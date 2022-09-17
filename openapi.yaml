@@ -173,6 +173,20 @@ paths:
           required: true
           schema:
             type: string
+        - in: query
+          name: ordering
+          description: Sort order
+          required: false
+          schema:
+            type: string
+            default: "last_updated"
+            enum: ["last_updated", "-last_updated", "name", "-name"]
+        - in: query
+          name: name
+          description: Prefix of label names to match against
+          required: false
+          schema:
+            type: string
       responses:
         "200":
           description: Repositories
@@ -180,6 +194,46 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/TagPage"
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /v2/repositories/{namespace}/{repository}/tags/{tag}:
+    get:
+      operationId: get-tag
+      summary: Get a tag
+      description: Get a tag
+      tags:
+        - Repositories
+      parameters:
+        - in: path
+          name: namespace
+          description: User or organization
+          required: true
+          schema:
+            type: string
+        - in: path
+          name: repository
+          description: Name of the repository
+          required: true
+          schema:
+            type: string
+        - in: path
+          name: tag
+          description: Name of the tag
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Tag
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Tag"
         "500":
           description: Internal server error
           content:
@@ -329,6 +383,7 @@ components:
         - next
         - previous
         - page
+        - page_size
       properties:
         count:
           type: integer
@@ -344,6 +399,9 @@ components:
         page:
           type: integer
           description: Current page
+        page_size:
+          type: integer
+          description: Number of entries per page
     Summary:
       type: object
       required:
@@ -363,6 +421,7 @@ components:
         - logo_url
         - certification_status
         - star_count
+        - pull_count
         - filter_type
       properties:
         id:
@@ -375,12 +434,7 @@ components:
           type: string
           enum: [image]
         publisher:
-          type: object
-          properties:
-            id:
-              type: string
-            name:
-              type: string
+          $ref: "#/components/schemas/Publisher"
         created_at:
           type: string
           format: date-time
@@ -396,52 +450,22 @@ components:
         categories:
           type: array
           items:
-            type: object
-            required:
-              - name
-              - label
-            properties:
-              name:
-                type: string
-              label:
-                type: string
+            $ref: "#/components/schemas/Label"
         operating_systems:
           type: array
           items:
-            type: object
-            required:
-              - name
-              - label
-            properties:
-              name:
-                type: string
-              label:
-                type: string
+            $ref: "#/components/schemas/Label"
         architectures:
           type: array
           items:
-            type: object
-            required:
-              - name
-              - label
-            properties:
-              name:
-                type: string
-              label:
-                type: string
+            $ref: "#/components/schemas/Label"
         logo_url:
-          type: object
-          required:
-            - small
-            - small@2x
-          properties:
-            small:
-              type: string
-            small@2x:
-              type: string
+          $ref: "#/components/schemas/Logo"
         certification_status:
           type: string
         star_count:
+          type: integer
+        pull_count:
           type: integer
         filter_type:
           type: string
@@ -674,18 +698,7 @@ components:
             layers:
               type: array
               items:
-                type: object
-                required:
-                  - size
-                  - instruction
-                properties:
-                  digest:
-                    type: string
-                  size:
-                    type: integer
-                    x-go-type: int64
-                  instruction:
-                    type: string
+                $ref: "#/components/schemas/Layer"
     Organization:
       type: object
       required:
@@ -775,4 +788,44 @@ components:
           type: object
           additionalProperties: true
         message:
+          type: string
+    Layer:
+      type: object
+      required:
+        - size
+        - instruction
+      properties:
+        digest:
+          type: string
+        size:
+          type: integer
+          x-go-type: int64
+        instruction:
+          type: string
+    Label:
+      type: object
+      required:
+        - name
+        - label
+      properties:
+        name:
+          type: string
+        label:
+          type: string
+    Logo:
+      type: object
+      required:
+        - small
+        - small@2x
+      properties:
+        small:
+          type: string
+        small@2x:
+          type: string
+    Publisher:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
           type: string

@@ -3,12 +3,9 @@
 /* eslint-disable */
 
 import type { Image } from './Image';
+import type { Layer } from './Layer';
 
 export type ImageWithDetails = (Image & {
-  layers: Array<{
-    digest?: string;
-    size: number;
-    instruction: string;
-  }>;
+  layers: Array<Layer>;
 });
 

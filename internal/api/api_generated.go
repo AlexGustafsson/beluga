@@ -22,6 +22,14 @@ const (
 	SummaryTypeImage SummaryType = "image"
 )
 
+// Defines values for GetTagsParamsOrdering.
+const (
+	GetTagsParamsOrderingLastUpdated      GetTagsParamsOrdering = "last_updated"
+	GetTagsParamsOrderingMinusLastUpdated GetTagsParamsOrdering = "-last_updated"
+	GetTagsParamsOrderingMinusName        GetTagsParamsOrdering = "-name"
+	GetTagsParamsOrderingName             GetTagsParamsOrdering = "name"
+)
+
 // Error defines model for Error.
 type Error struct {
 	Errinfo map[string]interface{} `json:"errinfo"`
@@ -48,11 +56,26 @@ type ImageWithDetails struct {
 	// Embedded struct due to allOf(#/components/schemas/Image)
 	Image `yaml:",inline"`
 	// Embedded fields due to inline allOf schema
-	Layers []struct {
-		Digest      *string `json:"digest,omitempty"`
-		Instruction string  `json:"instruction"`
-		Size        int64   `json:"size"`
-	} `json:"layers"`
+	Layers []Layer `json:"layers"`
+}
+
+// Label defines model for Label.
+type Label struct {
+	Label string `json:"label"`
+	Name  string `json:"name"`
+}
+
+// Layer defines model for Layer.
+type Layer struct {
+	Digest      *string `json:"digest,omitempty"`
+	Instruction string  `json:"instruction"`
+	Size        int64   `json:"size"`
+}
+
+// Logo defines model for Logo.
+type Logo struct {
+	Small   string `json:"small"`
+	Small2x string `json:"small@2x"`
 }
 
 // Organization defines model for Organization.
@@ -82,8 +105,17 @@ type Page struct {
 	// Page Current page
 	Page int `json:"page"`
 
+	// PageSize Number of entries per page
+	PageSize int `json:"page_size"`
+
 	// Previous URL to the previous page
 	Previous *string `json:"previous"`
+}
+
+// Publisher defines model for Publisher.
+type Publisher struct {
+	Id   *string `json:"id,omitempty"`
+	Name *string `json:"name,omitempty"`
 }
 
 // Repository defines model for Repository.
@@ -134,38 +166,24 @@ type RepositoryWithDetails struct {
 
 // Summary defines model for Summary.
 type Summary struct {
-	Architectures []struct {
-		Label string `json:"label"`
-		Name  string `json:"name"`
-	} `json:"architectures"`
-	Categories []struct {
-		Label string `json:"label"`
-		Name  string `json:"name"`
-	} `json:"categories"`
-	CertificationStatus string    `json:"certification_status"`
-	CreatedAt           time.Time `json:"created_at"`
-	FilterType          string    `json:"filter_type"`
-	Id                  string    `json:"id"`
-	LogoUrl             struct {
-		Small   string `json:"small"`
-		Small2x string `json:"small@2x"`
-	} `json:"logo_url"`
-	Name             string `json:"name"`
-	OperatingSystems []struct {
-		Label string `json:"label"`
-		Name  string `json:"name"`
-	} `json:"operating_systems"`
-	Popularity int `json:"popularity"`
-	Publisher  struct {
-		Id   *string `json:"id,omitempty"`
-		Name *string `json:"name,omitempty"`
-	} `json:"publisher"`
-	ShortDescription string      `json:"short_description"`
-	Slug             string      `json:"slug"`
-	Source           string      `json:"source"`
-	StarCount        int         `json:"star_count"`
-	Type             SummaryType `json:"type"`
-	UpdatedAt        time.Time   `json:"updated_at"`
+	Architectures       []Label     `json:"architectures"`
+	Categories          []Label     `json:"categories"`
+	CertificationStatus string      `json:"certification_status"`
+	CreatedAt           time.Time   `json:"created_at"`
+	FilterType          string      `json:"filter_type"`
+	Id                  string      `json:"id"`
+	LogoUrl             Logo        `json:"logo_url"`
+	Name                string      `json:"name"`
+	OperatingSystems    []Label     `json:"operating_systems"`
+	Popularity          int         `json:"popularity"`
+	Publisher           Publisher   `json:"publisher"`
+	PullCount           int         `json:"pull_count"`
+	ShortDescription    string      `json:"short_description"`
+	Slug                string      `json:"slug"`
+	Source              string      `json:"source"`
+	StarCount           int         `json:"star_count"`
+	Type                SummaryType `json:"type"`
+	UpdatedAt           time.Time   `json:"updated_at"`
 }
 
 // SummaryType defines model for Summary.Type.
@@ -248,6 +266,18 @@ type GetSearchParams struct {
 	Sort *string `form:"sort,omitempty" json:"sort,omitempty"`
 }
 
+// GetTagsParams defines parameters for GetTags.
+type GetTagsParams struct {
+	// Ordering Sort order
+	Ordering *GetTagsParamsOrdering `form:"ordering,omitempty" json:"ordering,omitempty"`
+
+	// Name Prefix of label names to match against
+	Name *string `form:"name,omitempty" json:"name,omitempty"`
+}
+
+// GetTagsParamsOrdering defines parameters for GetTags.
+type GetTagsParamsOrdering string
+
 // ServerInterface represents all server handlers.
 type ServerInterface interface {
 	// Perform a search
@@ -267,7 +297,10 @@ type ServerInterface interface {
 	GetDockerfile(w http.ResponseWriter, r *http.Request, namespace string, repository string)
 	// List repositories in a namespace
 	// (GET /v2/repositories/{namespace}/{repository}/tags)
-	GetTags(w http.ResponseWriter, r *http.Request, namespace string, repository string)
+	GetTags(w http.ResponseWriter, r *http.Request, namespace string, repository string, params GetTagsParams)
+	// Get a tag
+	// (GET /v2/repositories/{namespace}/{repository}/tags/{tag})
+	GetTag(w http.ResponseWriter, r *http.Request, namespace string, repository string, tag string)
 	// List images in tag
 	// (GET /v2/repositories/{namespace}/{repository}/tags/{tag}/images)
 	GetImages(w http.ResponseWriter, r *http.Request, namespace string, repository string, tag string)
@@ -515,8 +548,71 @@ func (siw *ServerInterfaceWrapper) GetTags(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
+	// Parameter object where we will unmarshal all parameters from the context
+	var params GetTagsParams
+
+	// ------------- Optional query parameter "ordering" -------------
+
+	err = runtime.BindQueryParameter("form", true, false, "ordering", r.URL.Query(), &params.Ordering)
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "ordering", Err: err})
+		return
+	}
+
+	// ------------- Optional query parameter "name" -------------
+
+	err = runtime.BindQueryParameter("form", true, false, "name", r.URL.Query(), &params.Name)
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "name", Err: err})
+		return
+	}
+
 	var handler = func(w http.ResponseWriter, r *http.Request) {
-		siw.Handler.GetTags(w, r, namespace, repository)
+		siw.Handler.GetTags(w, r, namespace, repository, params)
+	}
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler(w, r.WithContext(ctx))
+}
+
+// GetTag operation middleware
+func (siw *ServerInterfaceWrapper) GetTag(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	var err error
+
+	// ------------- Path parameter "namespace" -------------
+	var namespace string
+
+	err = runtime.BindStyledParameter("simple", false, "namespace", mux.Vars(r)["namespace"], &namespace)
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "namespace", Err: err})
+		return
+	}
+
+	// ------------- Path parameter "repository" -------------
+	var repository string
+
+	err = runtime.BindStyledParameter("simple", false, "repository", mux.Vars(r)["repository"], &repository)
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "repository", Err: err})
+		return
+	}
+
+	// ------------- Path parameter "tag" -------------
+	var tag string
+
+	err = runtime.BindStyledParameter("simple", false, "tag", mux.Vars(r)["tag"], &tag)
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "tag", Err: err})
+		return
+	}
+
+	var handler = func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.GetTag(w, r, namespace, repository, tag)
 	}
 
 	for _, middleware := range siw.HandlerMiddlewares {
@@ -720,6 +816,8 @@ func HandlerWithOptions(si ServerInterface, options GorillaServerOptions) http.H
 	r.HandleFunc(options.BaseURL+"/v2/repositories/{namespace}/{repository}/dockerfile", wrapper.GetDockerfile).Methods("GET")
 
 	r.HandleFunc(options.BaseURL+"/v2/repositories/{namespace}/{repository}/tags", wrapper.GetTags).Methods("GET")
+
+	r.HandleFunc(options.BaseURL+"/v2/repositories/{namespace}/{repository}/tags/{tag}", wrapper.GetTag).Methods("GET")
 
 	r.HandleFunc(options.BaseURL+"/v2/repositories/{namespace}/{repository}/tags/{tag}/images", wrapper.GetImages).Methods("GET")
 

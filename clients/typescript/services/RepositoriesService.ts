@@ -4,6 +4,7 @@
 import type { ImageWithDetails } from '../models/ImageWithDetails';
 import type { RepositoryPage } from '../models/RepositoryPage';
 import type { RepositoryWithDetails } from '../models/RepositoryWithDetails';
+import type { Tag } from '../models/Tag';
 import type { TagPage } from '../models/TagPage';
 
 import type { CancelablePromise } from '../core/CancelablePromise';
@@ -65,12 +66,16 @@ export class RepositoriesService {
    * List repositories in a namespace
    * @param namespace User or organization
    * @param repository Name of the repository
+   * @param ordering Sort order
+   * @param name Prefix of label names to match against
    * @returns TagPage Repositories
    * @throws ApiError
    */
   public getTags(
     namespace: string,
     repository: string,
+    ordering: 'last_updated' | '-last_updated' | 'name' | '-name' = 'last_updated',
+    name?: string,
   ): CancelablePromise<TagPage> {
     return this.httpRequest.request({
       method: 'GET',
@@ -78,6 +83,38 @@ export class RepositoriesService {
       path: {
         'namespace': namespace,
         'repository': repository,
+      },
+      query: {
+        'ordering': ordering,
+        'name': name,
+      },
+      errors: {
+        500: `Internal server error`,
+      },
+    });
+  }
+
+  /**
+   * Get a tag
+   * Get a tag
+   * @param namespace User or organization
+   * @param repository Name of the repository
+   * @param tag Name of the tag
+   * @returns Tag Tag
+   * @throws ApiError
+   */
+  public getTag(
+    namespace: string,
+    repository: string,
+    tag: string,
+  ): CancelablePromise<Tag> {
+    return this.httpRequest.request({
+      method: 'GET',
+      url: '/v2/repositories/{namespace}/{repository}/tags/{tag}',
+      path: {
+        'namespace': namespace,
+        'repository': repository,
+        'tag': tag,
       },
       errors: {
         500: `Internal server error`,

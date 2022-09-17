@@ -19,5 +19,9 @@ export type Page = {
    * Current page
    */
   page: number;
+  /**
+   * Number of entries per page
+   */
+  page_size: number;
 };
 
