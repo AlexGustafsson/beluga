@@ -1,5 +1,4 @@
 import { Tag } from "../client";
-import { formatLayersURL, preferredTagVariant } from "../utils";
 import {
   Card,
   Stack,
@@ -10,16 +9,20 @@ import {
   TableRow,
   Typography,
 } from "@mui/material";
-import { NavLink } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 
 export interface Props {
   value: Tag;
-  owner: string;
-  name: string;
+  namespace: string;
+  repositoryName: string;
 }
 
-export default function ({ owner, name, value }: Props): JSX.Element {
-  const defaultVariant = preferredTagVariant(value.variants);
+export default function ({
+  namespace,
+  repositoryName,
+  value,
+}: Props): JSX.Element {
+  const navigate = useNavigate();
 
   return (
     <Card sx={{ padding: "24px" }}>
@@ -28,24 +31,22 @@ export default function ({ owner, name, value }: Props): JSX.Element {
         <header className="flex justify-between">
           <Stack direction="column" sx={{ flexGrow: 1 }}>
             <NavLink
-              className="text-sm text-blue-500 underline font-semibold"
-              to={formatLayersURL(
-                owner,
-                name,
-                defaultVariant?.digest || "",
-                defaultVariant?.digestAlgorithm || ""
-              )}
+              className="text-sm text-blue-500 underline font-semibold self-start"
+              to={`/layers/${namespace}/${repositoryName}/${value.name}/images/${value.digest}`}
             >
               {value.name}
             </NavLink>
             <p className="text-xs mt-1">
               Last pushed{" "}
-              <span className="font-medium">{value.updated.toString()}</span> by{" "}
+              <span className="font-medium">
+                {value.last_updated.toString()}
+              </span>{" "}
+              by{" "}
               <NavLink
-                to={`/u/${owner}`}
+                to={`/u/${value.last_updated_username}`}
                 className="text-xs text-blue-500 underline"
               >
-                {owner}
+                {value.last_updated_username}
               </NavLink>
             </p>
             <Table size="small" aria-label="a dense table">
@@ -63,42 +64,34 @@ export default function ({ owner, name, value }: Props): JSX.Element {
                 </TableRow>
               </TableHead>
               <TableBody>
-                {value.variants.map((variant) => (
+                {value.images.map((image) => (
                   <TableRow
-                    key={variant.digest}
-                    component={NavLink}
-                    to={formatLayersURL(
-                      owner,
-                      name,
-                      variant.digest,
-                      variant.digestAlgorithm
-                    )}
+                    key={image.digest}
+                    className="cursor-pointer"
                     sx={{
                       "td, th": { border: 0 },
                       "&:hover": { backgroundColor: "#f2f8ff" },
                     }}
+                    /** A table row cannot exist within an anchor, hence we use onclick instead */
+                    onClick={() =>
+                      navigate(
+                        `/layers/${namespace}/${repositoryName}/${value.name}/images/${image.digest}`
+                      )
+                    }
                   >
                     <TableCell component="th" scope="row" sx={{ padding: 0 }}>
                       <NavLink
-                        to={formatLayersURL(
-                          owner,
-                          name,
-                          variant.digest,
-                          variant.digestAlgorithm
-                        )}
+                        to={`/layers/${namespace}/${repositoryName}/${value.name}/images/${image.digest}`}
                         className="underline text-blue-500"
                       >
-                        {variant.digest.substring(0, 12)}
+                        {image.digest.substring(0, 12)}
                       </NavLink>
                     </TableCell>
                     <TableCell align="left">
-                      {variant.os}/{variant.arch}
+                      {image.os}/{image.architecture}
                     </TableCell>
                     <TableCell align="right" sx={{ padding: 0 }}>
-                      {Math.round(
-                        (variant.compressedSize / 1024 / 1024) * 100
-                      ) / 100}{" "}
-                      MB
+                      {Math.round((image.size / 1024 / 1024) * 100) / 100} MB
                     </TableCell>
                   </TableRow>
                 ))}

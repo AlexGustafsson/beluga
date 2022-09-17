@@ -1,209 +1,34 @@
-import { Image, Tag, useClient } from "../client";
+import { ImageWithDetails, Tag, useClient } from "../client";
 import BreadcrumbSeparator from "../components/BreadcrumbSeparator";
-import ImageBox from "../components/ImageBox";
-import ImageTagCard from "../components/ImageTagCard";
-import TextFieldCopy from "../components/TextFieldCopy";
-import "../styles/markdown.css";
-import { Clear, Search } from "@mui/icons-material";
-import {
-  Breadcrumbs,
-  Card,
-  Divider,
-  IconButton,
-  InputAdornment,
-  MenuItem,
-  Pagination,
-  Select,
-  Stack,
-  Tab,
-  Tabs,
-  TextField,
-  Typography,
-} from "@mui/material";
-import { Box } from "@mui/system";
+import TagBox from "../components/TagBox";
+import { Box, Breadcrumbs, Card, Divider, Typography } from "@mui/material";
 import { useEffect, useState } from "react";
-import ReactMarkdown from "react-markdown";
-import { NavLink, useParams, useSearchParams } from "react-router-dom";
-import remarkGfm from "remark-gfm";
-
-function DescriptionPage(): JSX.Element {
-  const [image, setImage] = useState<Image>();
-
-  const client = useClient();
-  useEffect(() => {
-    client.fetchImage("_", "influxdb").then((x) => setImage(x));
-  }, []);
-
-  return (
-    <Box
-      sx={{ display: "grid", gridTemplateColumns: "1fr auto", gridGap: "14px" }}
-    >
-      {image?.description ? (
-        <Card sx={{ padding: "24px" }}>
-          <ReactMarkdown
-            className="markdown"
-            remarkPlugins={[remarkGfm]}
-            linkTarget="_blank"
-          >
-            {image.description}
-          </ReactMarkdown>
-        </Card>
-      ) : (
-        <Card
-          sx={{
-            padding: "24px",
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            justifyContent: "center",
-          }}
-        >
-          <p>No overview available</p>
-          <p>This repository doesn't have an overview</p>
-        </Card>
-      )}
-
-      <Card sx={{ padding: "24px", height: "max-content" }}>
-        <Typography
-          variant="subtitle1"
-          sx={{ marginBottom: "24px", fontWeight: 600 }}
-          component="p"
-        >
-          Docker Pull Command
-        </Typography>
-        <TextFieldCopy
-          value={`docker pull ${image?.owner}/${image?.name}`}
-          color="white"
-          backgroundColor="#27343B"
-        ></TextFieldCopy>
-      </Card>
-    </Box>
-  );
-}
-
-function TagsPage({
-  owner,
-  name,
-}: {
-  owner: string;
-  name: string;
-}): JSX.Element {
-  const [pages, setPages] = useState<number>(0);
-  const [page, setPage] = useState<number>(0);
-  const [results, setResults] = useState<Tag[]>([]);
-  const [totalResults, setTotalResults] = useState<number>(0);
-
-  const client = useClient();
-  useEffect(() => {
-    client.searchTags(owner, name, { page }).then((x) => {
-      setPages(x.pages);
-      setResults(x.results);
-      setTotalResults(x.count);
-    });
-  }, [page]);
-
-  return (
-    <div className="flex flex-col">
-      <header className="flex items-center space-x-4">
-        <p className="text-xs">Sort by</p>
-        <Select
-          defaultValue="newest"
-          size="small"
-          sx={{ backgroundColor: "#fbfbfc", fontSize: "12px" }}
-        >
-          <MenuItem value="newest" sx={{ fontSize: "12px" }}>
-            Newest
-          </MenuItem>
-          <MenuItem value="oldest" sx={{ fontSize: "12px" }}>
-            Oldest
-          </MenuItem>
-          <MenuItem value="a-z" sx={{ fontSize: "12px" }}>
-            A-Z
-          </MenuItem>
-          <MenuItem value="z-a" sx={{ fontSize: "12px" }}>
-            Z-A
-          </MenuItem>
-        </Select>
-        <TextField
-          size="small"
-          variant="outlined"
-          sx={{ backgroundColor: "#fbfbfc" }}
-          InputProps={{
-            placeholder: "Filter Tags",
-            startAdornment: (
-              <InputAdornment position="start">
-                <Search fontSize="small" />
-              </InputAdornment>
-            ),
-            endAdornment: (
-              <InputAdornment position="end">
-                <IconButton size="small">
-                  <Clear fontSize="small" />
-                </IconButton>
-              </InputAdornment>
-            ),
-            disableUnderline: true,
-            style: { fontSize: "12px" },
-          }}
-        />
-      </header>
-      <Stack direction="column" spacing={3} sx={{ marginTop: 2 }}>
-        {results.map((x) => (
-          <ImageTagCard key={x.name} owner={owner} name={name} value={x} />
-        ))}
-      </Stack>
-      <Pagination
-        count={pages}
-        page={page + 1}
-        shape="rounded"
-        showFirstButton
-        showLastButton
-        sx={{ alignSelf: "center", marginTop: "24px" }}
-      />
-    </div>
-  );
-}
+import { NavLink, useParams } from "react-router-dom";
 
 export default function (): JSX.Element {
-  const [searchParams, setSearchParams] = useSearchParams();
-  const { owner, name } = useParams();
-  const [tab, setTab] = useState<number>(0);
-  const [image, setImage] = useState<Image>();
-  const tabs = ["overview", "tags"];
+  const { namespace, repositoryName, tagName, digest } = useParams();
 
-  function tabChanged(
-    event: React.SyntheticEvent<Element, Event>,
-    value: number
-  ) {
-    if (value === 0) {
-      setSearchParams({});
-    } else {
-      setSearchParams({ tab: tabs[value].toLowerCase() });
-    }
-    setTab(value);
-  }
-
-  useEffect(() => {
-    const tab = searchParams.get("tab");
-    if (tab) {
-      const index = tabs.indexOf(tab);
-      if (index >= 0) {
-        setTab(index);
-      } else {
-        // Clear bad tabs
-        setSearchParams({});
-      }
-    }
-  }, []);
-
-  const pages = [<DescriptionPage />, <TagsPage owner={owner!} name={name!} />];
+  const [selectedLayer, setSelectedLayer] = useState<number>(0);
+  const [images, setImages] = useState<ImageWithDetails[]>();
+  const [image, setImage] = useState<ImageWithDetails>();
+  const [tag, setTag] = useState<Tag>();
 
   const client = useClient();
   useEffect(() => {
-    client
-      .fetchImage("_", "nginx", { includeDescription: true })
-      .then((x) => setImage(x));
-  }, []);
+    if (!namespace || !repositoryName || !tagName) {
+      return;
+    }
+
+    client.repositories.getTag(namespace, repositoryName, tagName).then((x) => {
+      setTag(x);
+    });
+    client.repositories
+      .getImages(namespace, repositoryName, tagName)
+      .then((x) => {
+        setImages(x);
+        setImage(x[0]);
+      });
+  }, [namespace, repositoryName, digest]);
 
   return (
     <div className="flex flex-col grow">
@@ -221,31 +46,104 @@ export default function (): JSX.Element {
         <NavLink to="/explore" className="hover:text-blue-500">
           Explore
         </NavLink>
-        <p className="text-sm text-blue-500">{`${owner}/${name}`}</p>
+        <NavLink
+          to={`/r/${namespace}/${repositoryName}/tags`}
+          className="hover:text-blue-500"
+        >
+          {namespace}/{repositoryName}
+        </NavLink>
+        <p className="text-sm text-blue-500">
+          {namespace}/{repositoryName}
+        </p>
       </Breadcrumbs>
       <Divider orientation="horizontal" />
       <header className="flex space-x-4">
-        {image ? <ImageBox value={image} sx={{ width: "100%" }} /> : null}
+        {tag ? (
+          <TagBox
+            namespace={namespace!}
+            repositoryName={repositoryName!}
+            sx={{ width: "100%" }}
+            value={tag}
+            tagName={tag.name}
+          />
+        ) : null}
       </header>
+      <Divider />
       <Box
         sx={{
-          paddingLeft: "24px",
-          paddingRight: "24px",
+          padding: "12px",
+          backgroundColor: "#f7f7f8",
+          flexGrow: 1,
         }}
       >
-        <Tabs value={tab} onChange={tabChanged}>
-          {tabs.map((x) => (
-            <Tab
-              key={x}
-              label={x}
-              sx={{ padding: "20px", textTransform: "capitalize" }}
-            />
-          ))}
-        </Tabs>
-      </Box>
-      <Divider />
-      <Box sx={{ padding: "12px", backgroundColor: "#f7f7f8", flexGrow: 1 }}>
-        {pages[tab]}
+        <Typography variant="body2" component="p" sx={{ marginBottom: "14px" }}>
+          IMAGE LAYERS
+        </Typography>
+        <Box
+          sx={{
+            display: "grid",
+            gridTemplateColumns: "1fr 2fr",
+            gridGap: "14px",
+          }}
+        >
+          <Card className="relative h-max">
+            <ul>
+              {image?.layers?.map((x, i) => (
+                <li
+                  key={i}
+                  className={
+                    "flex h-10 items-center text-xs cursor-pointer hover:bg-blue-100" +
+                    (i === selectedLayer ? " bg-slate-100" : "")
+                  }
+                  onClick={() => setSelectedLayer(i)}
+                >
+                  <p className="text-gray-300 w-8 pr-2 text-right z-10 text-sm shrink-0">
+                    {i + 1}
+                  </p>
+                  <code
+                    className={
+                      "pl-2 pr-4 grow truncate" +
+                      (i === selectedLayer ? " font-bold" : "")
+                    }
+                  >
+                    {x.instruction}
+                  </code>
+                  <code
+                    className={
+                      "pr-2 shrink-0" +
+                      (i === selectedLayer ? " font-bold" : "")
+                    }
+                  >
+                    {x.size}
+                  </code>
+                  <hr
+                    className={
+                      "h-full w-2 border-0" +
+                      (i === selectedLayer ? " bg-blue-500" : "")
+                    }
+                  />
+                </li>
+              ))}
+            </ul>
+            <div className="absolute top-0 h-full w-8 bg-slate-100"></div>
+          </Card>
+          <Card sx={{ padding: "24px", height: "max-content" }}>
+            <Typography
+              variant="body2"
+              sx={{ marginBottom: "24px" }}
+              component="p"
+            >
+              Command
+            </Typography>
+            <pre className="whitespace-pre">
+              <code className="block bg-slate-600 p-4 text-white font-mono text-xs w-full">
+                {image && image.layers
+                  ? image.layers[selectedLayer].instruction
+                  : null}
+              </code>
+            </pre>
+          </Card>
+        </Box>
       </Box>
     </div>
   );

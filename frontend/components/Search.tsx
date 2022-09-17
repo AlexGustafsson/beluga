@@ -54,21 +54,21 @@ export default function ({
   sx?: SxProps<Theme>;
   placeholder?: string;
 }): JSX.Element {
-  const options = top100Films.map((option) => {
-    const firstLetter = option.title[0].toUpperCase();
-    return {
-      firstLetter: /\d/.test(firstLetter) ? "0-9" : firstLetter,
-      ...option,
-    };
-  });
+  const options = top100Films
+    .map((option) => {
+      const firstLetter = option.title[0].toUpperCase();
+      return {
+        firstLetter: /\d/.test(firstLetter) ? "0-9" : firstLetter,
+        ...option,
+      };
+    })
+    .sort((a, b) => -b.firstLetter.localeCompare(a.firstLetter));
 
   return (
     <Box>
       <Autocomplete
         id="grouped-demo"
-        options={options.sort(
-          (a, b) => -b.firstLetter.localeCompare(a.firstLetter)
-        )}
+        options={options}
         freeSolo
         disablePortal
         PopperComponent={CustomPopper}

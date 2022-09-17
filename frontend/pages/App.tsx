@@ -2,7 +2,7 @@ import Search from "../components/Search";
 import ExplorePage from "./ExplorePage";
 import HomePage from "./HomePage";
 import ImagePage from "./ImagePage";
-import LayerPage from "./LayerPage";
+import RepositoryPage from "./RepositoryPage";
 import { Button } from "@mui/material";
 import { NavLink, Route, Routes } from "react-router-dom";
 
@@ -43,10 +43,14 @@ export default function (): JSX.Element {
         <Route path="/" element={<HomePage />} />
         <Route path="/explore" element={<ExplorePage />} />
         <Route path="/login" element={<HomePage />} />
-        <Route path="/images/:owner/:name" element={<ImagePage />} />
         <Route
-          path="/images/:owner/:name/layers/:layer"
-          element={<LayerPage />}
+          path="/r/:namespace/:repositoryName"
+          element={<RepositoryPage />}
+        />
+        <Route path="/_/:repositoryName" element={<RepositoryPage />} />
+        <Route
+          path="/layers/:namespace/:repositoryName/:tagName/images/:digest"
+          element={<ImagePage />}
         />
       </Routes>
       <footer

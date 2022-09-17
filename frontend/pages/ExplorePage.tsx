@@ -1,5 +1,5 @@
-import { Image, useClient } from "../client";
-import ImageCard from "../components/ImageCard";
+import { Summary, useClient } from "../client";
+import ImageCard from "../components/RepositoryCard";
 import {
   Checkbox,
   Chip,
@@ -33,7 +33,7 @@ export default function (): JSX.Element {
   const [filters, setFilters] = useState<string[]>([]);
   const [pages, setPages] = useState<number>(0);
   const [page, setPage] = useState<number>(0);
-  const [results, setResults] = useState<Image[]>([]);
+  const [results, setResults] = useState<Summary[]>([]);
   const [totalResults, setTotalResults] = useState<number>(0);
 
   function addFilter(filter: string) {
@@ -47,10 +47,10 @@ export default function (): JSX.Element {
   const client = useClient();
 
   useEffect(() => {
-    client.searchImages().then((results) => {
-      setPages(results.pages);
-      setTotalResults(results.count);
-      setResults(results.results);
+    client.search.getSearch().then((page) => {
+      setPages(Math.ceil(page.count / page.page_size));
+      setTotalResults(page.count);
+      setResults(page.summaries);
     });
   }, [page, filters]);
 
@@ -144,10 +144,8 @@ export default function (): JSX.Element {
           sx={{ flexGrow: 1, marginTop: 1 }}
         >
           {results.map((x) => (
-            <NavLink
-              key={x.owner + "/" + x.name}
-              to={`/images/${x.owner}/${x.name}`}
-            >
+            /** TODO: "library" repositories are served on /_/:name */
+            <NavLink key={x.name} to={`/r/${x.slug}`}>
               <ImageCard value={x}></ImageCard>
             </NavLink>
           ))}

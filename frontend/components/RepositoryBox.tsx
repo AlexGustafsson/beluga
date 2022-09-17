@@ -1,5 +1,4 @@
-import { Image } from "../client";
-import { formatImageDisplayName } from "../utils";
+import { RepositoryWithDetails } from "../client";
 import { DataUsage } from "@mui/icons-material";
 import {
   Box,
@@ -10,10 +9,11 @@ import {
   Theme,
   Typography,
 } from "@mui/material";
+import { NavLink } from "react-router-dom";
 
 export interface Props {
   sx?: SxProps<Theme>;
-  value: Image;
+  value: RepositoryWithDetails;
 }
 
 export default function ({ sx, value }: Props): JSX.Element {
@@ -27,28 +27,37 @@ export default function ({ sx, value }: Props): JSX.Element {
         />
         <Stack direction="column" sx={{ flexGrow: 1 }}>
           <Typography variant="h5" component="p">
-            {formatImageDisplayName(value.owner, value.name)}
+            {value.namespace}/{value.name}
           </Typography>
           <Typography variant="body2" component="p">
-            {`By ${value.owner} • Updated ${value.updated}`}
+            By{" "}
+            <NavLink
+              to={`/u/${value.hub_user}`}
+              className="text-xs text-blue-500 underline"
+            >
+              {value.hub_user}
+            </NavLink>{" "}
+            • Updated {value.last_updated}
           </Typography>
           <Typography
             variant="body2"
             component="p"
             sx={{ flexGrow: 1, marginTop: 2 }}
           >
-            {value.summary}
+            {value.description}
           </Typography>
           <Stack direction="row" spacing={1} sx={{ marginTop: 1 }}>
-            {value.tags.map((x) => (
-              <Chip key={x} label={x} size="small" />
-            ))}
+            <Chip
+              key={value.repository_type}
+              label={value.repository_type}
+              size="small"
+            />
           </Stack>
         </Stack>
         <Stack direction="row" spacing={1}>
           <Stack direction="column" sx={{ alignItems: "flex-end" }}>
             <Typography variant="subtitle2" component="p">
-              {value.downloads}
+              {value.pull_count}
             </Typography>
             <Typography variant="subtitle2" component="p">
               Downloads
@@ -56,7 +65,7 @@ export default function ({ sx, value }: Props): JSX.Element {
           </Stack>
           <Stack direction="column" sx={{ alignItems: "flex-end" }}>
             <Typography variant="subtitle2" component="p">
-              {value.stars}
+              {value.star_count}
             </Typography>
             <Typography variant="subtitle2" component="p">
               Stars
