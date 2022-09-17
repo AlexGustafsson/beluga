@@ -38,7 +38,7 @@ export default function (): JSX.Element {
       <Divider orientation="horizontal" />
       <div className="flex">
         <main className="flex flex-col grow p-3 space-y-4">
-          <h1>Create repository</h1>
+          <h1 className="text-2xl">Create repository</h1>
           <div className="flex space-x-4">
             <Select
               defaultValue="newest"
@@ -61,7 +61,7 @@ export default function (): JSX.Element {
             <TextField className="grow" placeholder="Name" variant="standard" />
           </div>
           <TextField placeholder="Description" variant="standard" />
-          <h2>Visibility</h2>
+          <h2 className="text-xl">Visibility</h2>
           <FormControl>
             <RadioGroup row defaultValue="public">
               <FormControlLabel
@@ -103,7 +103,7 @@ export default function (): JSX.Element {
             </Button>
           </div>
         </main>
-        <aside className="flex flex-col">
+        <aside className="flex flex-col p-3 space-y-2">
           <h2>Pro tip</h2>
           <p>You can push a new image to this repository using the CLI</p>
           <code className="p-2 rounded bg-gray-400">
