@@ -2,11 +2,23 @@ import Search from "../components/Search";
 import ExplorePage from "./ExplorePage";
 import HomePage from "./HomePage";
 import ImagePage from "./ImagePage";
+import OrganizationsPage from "./OrganizationsPage";
+import RepositoriesPage from "./RepositoriesPage";
 import RepositoryPage from "./RepositoryPage";
-import { Button } from "@mui/material";
+import SettingsPage from "./SettingsPage";
+import UserProfilePage from "./UserProfilePage";
+import { KeyboardArrowDown } from "@mui/icons-material";
+import { Button, Divider, Menu, MenuItem } from "@mui/material";
+import { useRef, useState } from "react";
 import { NavLink, Route, Routes } from "react-router-dom";
 
 export default function (): JSX.Element {
+  const profileMenuRef = useRef<HTMLButtonElement | null>(null);
+  const [profileMenuOpen, setProfileMenuOpen] = useState<boolean>(false);
+
+  // TODO: Implement user handling
+  const [username, setUsername] = useState<string | undefined>("joedoe");
+
   return (
     <div className="flex flex-col min-h-screen">
       <header
@@ -32,11 +44,58 @@ export default function (): JSX.Element {
               Explore
             </Button>
           </NavLink>
-          <NavLink to="/login">
-            <Button color="inherit" style={{ textTransform: "none" }}>
-              Sign In
-            </Button>
-          </NavLink>
+          {username ? (
+            <>
+              <NavLink to="/repositories">
+                <Button color="inherit" style={{ textTransform: "none" }}>
+                  Repositories
+                </Button>
+              </NavLink>
+              <NavLink to="/orgs">
+                <Button color="inherit" style={{ textTransform: "none" }}>
+                  Organizations
+                </Button>
+              </NavLink>
+              <Button
+                ref={profileMenuRef}
+                color="inherit"
+                style={{ textTransform: "none" }}
+                endIcon={<KeyboardArrowDown />}
+                onClick={() => setProfileMenuOpen(true)}
+              >
+                {username}
+              </Button>
+              <Menu
+                id="profile-menu"
+                anchorEl={profileMenuRef.current}
+                open={profileMenuOpen}
+                onClose={() => setProfileMenuOpen(false)}
+              >
+                <NavLink
+                  to={`/u/${username}`}
+                  onClick={() => setProfileMenuOpen(false)}
+                >
+                  <MenuItem>My Profile</MenuItem>
+                </NavLink>
+                <Divider />
+                <NavLink
+                  to="/settings/general"
+                  onClick={() => setProfileMenuOpen(false)}
+                >
+                  <MenuItem>Account Settings</MenuItem>
+                </NavLink>
+                <MenuItem onClick={() => setProfileMenuOpen(false)}>
+                  Sign Out
+                </MenuItem>
+              </Menu>
+            </>
+          ) : (
+            <NavLink to="/login">
+              <Button color="inherit" style={{ textTransform: "none" }}>
+                Sign In
+              </Button>
+            </NavLink>
+          )}
         </div>
       </header>
       <Routes>
@@ -52,6 +111,10 @@ export default function (): JSX.Element {
           path="/layers/:namespace/:repositoryName/:tagName/images/:digest"
           element={<ImagePage />}
         />
+        <Route path="/settings/:page" element={<SettingsPage />} />
+        <Route path="/u/:username" element={<UserProfilePage />} />
+        <Route path="/repositories" element={<RepositoriesPage />} />
+        <Route path="/orgs" element={<OrganizationsPage />} />
       </Routes>
       <footer
         className="flex h-96 px-6 py-10"
