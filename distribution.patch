@@ -1,0 +1,100 @@
+diff --git a/registry/handlers/app.go b/registry/handlers/app.go
+index 0514ed22..a273567c 100644
+--- a/registry/handlers/app.go
++++ b/registry/handlers/app.go
+@@ -93,7 +93,7 @@ type App struct {
+ // NewApp takes a configuration and returns a configured app, ready to serve
+ // requests. The app only implements ServeHTTP and can be wrapped in other
+ // handlers accordingly.
+-func NewApp(ctx context.Context, config *configuration.Configuration) *App {
++func NewApp(ctx context.Context, config *configuration.Configuration, additionalSinks ...events.Sink) *App {
+ 	app := &App{
+ 		Config:  config,
+ 		Context: ctx,
+@@ -158,7 +158,7 @@ func NewApp(ctx context.Context, config *configuration.Configuration) *App {
+ 	}
+ 
+ 	app.configureSecret(config)
+-	app.configureEvents(config)
++	app.configureEvents(config, additionalSinks...)
+ 	app.configureRedis(config)
+ 	app.configureLogHook(config)
+ 
+@@ -446,7 +446,7 @@ func (app *App) register(routeName string, dispatch dispatchFunc) {
+ }
+ 
+ // configureEvents prepares the event sink for action.
+-func (app *App) configureEvents(configuration *configuration.Configuration) {
++func (app *App) configureEvents(configuration *configuration.Configuration, additionalSinks ...events.Sink) {
+ 	// Configure all of the endpoint sinks.
+ 	var sinks []events.Sink
+ 	for _, endpoint := range configuration.Notifications.Endpoints {
+@@ -467,6 +467,7 @@ func (app *App) configureEvents(configuration *configuration.Configuration) {
+ 
+ 		sinks = append(sinks, endpoint)
+ 	}
++	sinks = append(sinks, additionalSinks...)
+ 
+ 	// NOTE(stevvooe): Moving to a new queuing implementation is as easy as
+ 	// replacing broadcaster with a rabbitmq implementation. It's recommended
+diff --git a/registry/registry.go b/registry/registry.go
+index 625102df..664dc2ad 100644
+--- a/registry/registry.go
++++ b/registry/registry.go
+@@ -17,6 +17,7 @@ import (
+ 
+ 	logstash "github.com/bshuster-repo/logrus-logstash-hook"
+ 	"github.com/bugsnag/bugsnag-go"
++	"github.com/docker/go-events"
+ 	"github.com/docker/go-metrics"
+ 	gorhandlers "github.com/gorilla/handlers"
+ 	"github.com/sirupsen/logrus"
+@@ -135,10 +136,12 @@ type Registry struct {
+ 	config *configuration.Configuration
+ 	app    *handlers.App
+ 	server *http.Server
++
++	handler http.Handler
+ }
+ 
+ // NewRegistry creates a new registry from a context and configuration struct.
+-func NewRegistry(ctx context.Context, config *configuration.Configuration) (*Registry, error) {
++func NewRegistry(ctx context.Context, config *configuration.Configuration, additionalSinks ...events.Sink) (*Registry, error) {
+ 	var err error
+ 	ctx, err = configureLogging(ctx, config)
+ 	if err != nil {
+@@ -151,7 +154,7 @@ func NewRegistry(ctx context.Context, config *configuration.Configuration) (*Reg
+ 	// with uuid generation under low entropy.
+ 	uuid.Loggerf = dcontext.GetLogger(ctx).Warnf
+ 
+-	app := handlers.NewApp(ctx, config)
++	app := handlers.NewApp(ctx, config, additionalSinks...)
+ 	// TODO(aaronl): The global scope of the health checks means NewRegistry
+ 	// can only be called once per process.
+ 	app.RegisterHealthChecks()
+@@ -168,9 +171,10 @@ func NewRegistry(ctx context.Context, config *configuration.Configuration) (*Reg
+ 	}
+ 
+ 	return &Registry{
+-		app:    app,
+-		config: config,
+-		server: server,
++		app:     app,
++		config:  config,
++		server:  server,
++		handler: handler,
+ 	}, nil
+ }
+ 
+@@ -203,6 +207,11 @@ func getCipherSuiteNames(ids []uint16) []string {
+ 	return names
+ }
+ 
++// ServeHTTP implements http.Handler.
++func (registry *Registry) ServeHTTP(w http.ResponseWriter, r *http.Request) {
++	registry.handler.ServeHTTP(w, r)
++}
++
+ // ListenAndServe runs the registry's HTTP server.
+ func (registry *Registry) ListenAndServe() error {
+ 	config := registry.config
