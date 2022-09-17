@@ -1,0 +1,13 @@
+package: api
+generate:
+  gorilla-server: true
+  strict: true
+  models: true
+compatibility:
+  always-prefix-enum-values: true
+  disable-required-readonly-as-pointer: true
+  # Embed structs when using allOf
+  old-merge-schemas: true
+# NOTE: the path is relative to the CWD when the tool is run,
+# which is internal/api
+output: api_generated.go
