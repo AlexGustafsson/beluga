@@ -1,4 +1,5 @@
 import Search from "../components/Search";
+import CreateRepositoryPage from "./CreateRepositoryPage";
 import ExplorePage from "./ExplorePage";
 import HomePage from "./HomePage";
 import ImagePage from "./ImagePage";
@@ -115,6 +116,7 @@ export default function (): JSX.Element {
         <Route path="/u/:username" element={<UserProfilePage />} />
         <Route path="/repositories" element={<RepositoriesPage />} />
         <Route path="/orgs" element={<OrganizationsPage />} />
+        <Route path="/repository/create" element={<CreateRepositoryPage />} />
       </Routes>
       <footer
         className="flex h-96 px-6 py-10"

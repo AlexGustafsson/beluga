@@ -20,9 +20,7 @@ export default function (): JSX.Element {
         <NavLink to="/settings/general" className="hover:text-blue-500">
           Account Settings
         </NavLink>
-        <NavLink to="/settings/general" className="text-sm text-blue-500">
-          General
-        </NavLink>
+        <p className="text-sm text-blue-500">General</p>
       </Breadcrumbs>
       <Divider orientation="horizontal" />
     </div>
