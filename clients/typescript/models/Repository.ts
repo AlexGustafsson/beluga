@@ -5,7 +5,7 @@
 export type Repository = {
   name: string;
   namespace: string;
-  repository_type: Repository.repository_type | null;
+  repository_type: 'image' | null;
   status: number;
   is_private: boolean;
   star_count: number;
@@ -15,13 +15,4 @@ export type Repository = {
   affiliation: string | null;
   media_types: Array<string>;
 };
-
-export namespace Repository {
-
-  export enum repository_type {
-    IMAGE = 'image',
-  }
-
-
-}
 

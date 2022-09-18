@@ -10,7 +10,7 @@ export type Summary = {
   id: string;
   name: string;
   slug: string;
-  type: Summary.type;
+  type: 'image';
   publisher: Publisher;
   created_at: string;
   updated_at: string;
@@ -26,13 +26,4 @@ export type Summary = {
   pull_count: number;
   filter_type: string;
 };
-
-export namespace Summary {
-
-  export enum type {
-    IMAGE = 'image',
-  }
-
-
-}
 

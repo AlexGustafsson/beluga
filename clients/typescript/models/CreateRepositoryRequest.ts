@@ -10,19 +10,9 @@ export type CreateRepositoryRequest = {
   image?: string;
   name?: string;
   description?: string;
-  privacy?: CreateRepositoryRequest.privacy;
+  privacy?: 'public' | 'private';
   provider?: string | null;
   build_settings?: Array<BuildSettings>;
   is_private?: boolean;
 };
-
-export namespace CreateRepositoryRequest {
-
-  export enum privacy {
-    PUBLIC = 'public',
-    PRIVATE = 'private',
-  }
-
-
-}
 

@@ -14,15 +14,21 @@ export class OrganizationsService {
   /**
    * Fetch organizations
    * Fetch organizations
+   * @param pageSize Page size
    * @returns any Organizations
    * @throws ApiError
    */
-  public getOrganizations(): CancelablePromise<(Page & {
+  public getOrganizations(
+    pageSize?: number,
+  ): CancelablePromise<(Page & {
     results: Array<Organization>;
   })> {
     return this.httpRequest.request({
       method: 'GET',
       url: '/v2/orgs',
+      query: {
+        'page_size': pageSize,
+      },
       errors: {
         500: `Internal server error`,
       },

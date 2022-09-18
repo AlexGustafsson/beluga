@@ -20,4 +20,4 @@ storepatch:
 generate-clients: generate-typescript-client
 
 generate-typescript-client:
-	npx openapi-typescript-codegen --input openapi.yaml --output clients/typescript --client fetch --indent 2 --name ApiClient
+	npx openapi-typescript-codegen --input openapi.yaml --output clients/typescript --client fetch --indent 2 --useUnionTypes --name ApiClient
