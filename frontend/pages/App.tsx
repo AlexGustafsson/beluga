@@ -6,6 +6,14 @@ import ImagePage from "./ImagePage";
 import OrganizationsPage from "./OrganizationsPage";
 import RepositoriesPage from "./RepositoriesPage";
 import RepositoryPage from "./RepositoryPage";
+import RepositorySettingsPage, {
+  RepositoryBuildsSettingsPage,
+  RepositoryCollaboratorsSettingsPage,
+  RepositoryGeneralSettingsPage,
+  RepositorySettingsSettingsPage,
+  RepositoryTagsSettingsPage,
+  RepositoryWebhooksSettingsPage,
+} from "./RepositorySettingsPage";
 import SettingsPage from "./SettingsPage";
 import UserProfilePage from "./UserProfilePage";
 import { KeyboardArrowDown } from "@mui/icons-material";
@@ -117,6 +125,21 @@ export default function (): JSX.Element {
         <Route path="/repositories" element={<RepositoriesPage />} />
         <Route path="/orgs" element={<OrganizationsPage />} />
         <Route path="/repository/create" element={<CreateRepositoryPage />} />
+        <Route
+          path="/repository/:registryName/:namespace/:repositoryName"
+          element={<RepositorySettingsPage />}
+        >
+          <Route index element={<RepositoryGeneralSettingsPage />} />
+          <Route path="general" element={<RepositoryGeneralSettingsPage />} />
+          <Route path="tags" element={<RepositoryTagsSettingsPage />} />
+          <Route path="builds" element={<RepositoryBuildsSettingsPage />} />
+          <Route
+            path="collaborators"
+            element={<RepositoryCollaboratorsSettingsPage />}
+          />
+          <Route path="webhooks" element={<RepositoryWebhooksSettingsPage />} />
+          <Route path="settings" element={<RepositorySettingsSettingsPage />} />
+        </Route>
       </Routes>
       <footer
         className="flex h-96 px-6 py-10"
