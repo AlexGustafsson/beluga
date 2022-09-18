@@ -1,3 +1,4 @@
+import { useClient } from "../client";
 import BreadcrumbSeparator from "../components/BreadcrumbSeparator";
 import "../styles/markdown.css";
 import { Lock, Public } from "@mui/icons-material";
@@ -14,9 +15,81 @@ import {
   Stack,
   TextField,
 } from "@mui/material";
-import { NavLink } from "react-router-dom";
+import { useCallback, useEffect, useState } from "react";
+import { NavLink, useNavigate } from "react-router-dom";
 
 export default function (): JSX.Element {
+  const [namespace, setNamespace] = useState<string>("username");
+  const [namespaces, setNamespaces] = useState<string[]>(["username"]);
+  const [name, setName] = useState<string>("");
+  const [nameError, setNameError] = useState<string>();
+  const [description, setDescription] = useState<string>("");
+  const [descriptionError, setDescriptionError] = useState<string>();
+  const [visibility, setVisibility] = useState<"public" | "private">("public");
+
+  const client = useClient();
+  useEffect(() => {
+    client.organizations.getOrganizations(200).then((x) => {
+      setNamespaces(["username", ...x.results.map((y) => y.orgname)]);
+    });
+  }, []);
+
+  useEffect(() => {
+    if (name === "") {
+      setNameError("Repository name is required");
+    } else if (name.match(/^[a-z0-9.,_-]+$/) === null) {
+      setNameError(
+        "Your repository name must contain a combination of alphanumeric characters and may contain the special characters ., _, or -. Letters must be lowercase."
+      );
+    } else if (name.length < 2 || name.length > 255) {
+      setNameError(
+        "Ensure that this value has at least 2 and at most 255 characters"
+      );
+    } else {
+      setNameError(undefined);
+    }
+  }, [name]);
+
+  useEffect(() => {
+    if (description.length > 100) {
+      setDescriptionError(
+        "Description length should be no longer than 100 characters"
+      );
+    } else {
+      setDescriptionError(undefined);
+    }
+  }, [description]);
+
+  const navigate = useNavigate();
+
+  const submit = useCallback(() => {
+    client.repositories
+      .postRepositories({
+        namespace: namespace,
+        registry: "beluga",
+        image: `${namespace}/${name}`,
+        name: name,
+        description: description,
+        privacy: visibility,
+        provider: null,
+        build_settings: [
+          {
+            nocache: false,
+            build_context: "/",
+            source_type: "Branch",
+            tag: "latest",
+            dockerfile: "Dockerfile",
+            source_name: "master",
+            autobuild: true,
+          },
+        ],
+        is_private: visibility === "private",
+      })
+      .then(() => {
+        navigate(`/repository/beluga/${namespace}/${name}`);
+      });
+  }, [namespace, name, description, visibility]);
+
   return (
     <div className="flex flex-col grow">
       <Breadcrumbs
@@ -37,42 +110,66 @@ export default function (): JSX.Element {
       </Breadcrumbs>
       <Divider orientation="horizontal" />
       <div className="flex">
-        <main className="flex flex-col grow p-3 space-y-4">
-          <h1 className="text-2xl">Create repository</h1>
-          <div className="flex space-x-4">
+        <main className="flex flex-col grow p-3 pt-4 space-y-4">
+          <h1 className="text-xl font-bold">Create repository</h1>
+          <Stack direction="row" className="space-x-4">
             <Select
-              defaultValue="newest"
+              value={namespace}
+              onChange={(e) => setNamespace(e.target.value)}
               size="small"
+              className="self-start"
               sx={{ backgroundColor: "#fbfbfc", fontSize: "12px" }}
             >
-              <MenuItem value="newest" sx={{ fontSize: "12px" }}>
-                Newest
-              </MenuItem>
-              <MenuItem value="oldest" sx={{ fontSize: "12px" }}>
-                Oldest
-              </MenuItem>
-              <MenuItem value="a-z" sx={{ fontSize: "12px" }}>
-                A-Z
-              </MenuItem>
-              <MenuItem value="z-a" sx={{ fontSize: "12px" }}>
-                Z-A
-              </MenuItem>
+              {namespaces.map((x) => (
+                <MenuItem key={x} value={x} sx={{ fontSize: "12px" }}>
+                  {x}
+                </MenuItem>
+              ))}
             </Select>
-            <TextField className="grow" placeholder="Name" variant="standard" />
-          </div>
-          <TextField placeholder="Description" variant="standard" />
-          <h2 className="text-xl">Visibility</h2>
+            <TextField
+              error={typeof nameError !== "undefined"}
+              helperText={nameError}
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              className="grow"
+              placeholder="Name"
+              variant="standard"
+            />
+          </Stack>
+          <TextField
+            error={typeof descriptionError !== "undefined"}
+            helperText={descriptionError}
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            placeholder="Description"
+            variant="standard"
+          />
+          <h2 className="text-lg font-medium !mt-16">Visibility</h2>
           <FormControl>
-            <RadioGroup row defaultValue="public">
+            <RadioGroup
+              row
+              defaultValue="public"
+              value={visibility}
+              onChange={(e) =>
+                setVisibility(e.target.value as "public" | "private")
+              }
+            >
               <FormControlLabel
                 value="public"
                 control={<Radio />}
                 label={
                   <Stack>
-                    <p>
-                      Public <Public />
+                    <p className="text-sm font-medium">
+                      Public{" "}
+                      <Public
+                        sx={{
+                          width: "18px",
+                          height: "18px",
+                          fill: "rgb(130, 148, 158)",
+                        }}
+                      />
                     </p>
-                    <p>Appears in Beluga search results</p>
+                    <p className="text-sm">Appears in Beluga search results</p>
                   </Stack>
                 }
               />
@@ -81,37 +178,56 @@ export default function (): JSX.Element {
                 control={<Radio />}
                 label={
                   <Stack>
-                    <p>
-                      Private <Lock />
+                    <p className="text-sm font-medium">
+                      Private{" "}
+                      <Lock
+                        sx={{
+                          width: "18px",
+                          height: "18px",
+                          fill: "rgb(130, 148, 158)",
+                        }}
+                      />
                     </p>
-                    <p>Only visible to you</p>
+                    <p className="text-sm">Only visible to you</p>
                   </Stack>
                 }
               />
             </RadioGroup>
           </FormControl>
           <div className="flex space-x-4 justify-end">
+            <NavLink to="/repositories">
+              <Button
+                variant="outlined"
+                color="error"
+                style={{ textTransform: "none" }}
+              >
+                Cancel
+              </Button>
+            </NavLink>
             <Button
-              variant="outlined"
-              color="error"
+              disabled={name === ""}
+              variant="contained"
               style={{ textTransform: "none" }}
+              onClick={submit}
             >
-              Cancel
-            </Button>
-            <Button variant="contained" style={{ textTransform: "none" }}>
               Create
             </Button>
           </div>
         </main>
-        <aside className="flex flex-col p-3 space-y-2">
-          <h2>Pro tip</h2>
-          <p>You can push a new image to this repository using the CLI</p>
-          <code className="p-2 rounded bg-gray-400">
+        <aside className="flex flex-col p-3 pt-4 space-y-2">
+          <h2 className="font-medium">Pro tip</h2>
+          <p className="text-sm">
+            You can push a new image to this repository using the CLI
+          </p>
+          <code
+            className="px-3 py-4 rounded text-sm text-white"
+            style={{ backgroundColor: "#445E6E" }}
+          >
             docker tag local-image:tagname new-repo:tagname
             <br />
             docker push new-repo:tagname
           </code>
-          <p>
+          <p className="text-sm">
             Make sure to change tagname with your desired image repository tag.
           </p>
         </aside>
