@@ -1,6 +1,7 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
+import type { CreateRepositoryRequest } from '../models/CreateRepositoryRequest';
 import type { ImageWithDetails } from '../models/ImageWithDetails';
 import type { RepositoryPage } from '../models/RepositoryPage';
 import type { RepositoryWithDetails } from '../models/RepositoryWithDetails';
@@ -13,6 +14,23 @@ import type { BaseHttpRequest } from '../core/BaseHttpRequest';
 export class RepositoriesService {
 
   constructor(public readonly httpRequest: BaseHttpRequest) {}
+
+  /**
+   * Create a repository
+   * Create a repository
+   * @param requestBody Repository to create
+   * @throws ApiError
+   */
+  public postRepositories(
+    requestBody: CreateRepositoryRequest,
+  ): CancelablePromise<void> {
+    return this.httpRequest.request({
+      method: 'POST',
+      url: '/v2/repositories',
+      body: requestBody,
+      mediaType: 'application/json',
+    });
+  }
 
   /**
    * List repositories in a namespace

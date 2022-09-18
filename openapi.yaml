@@ -334,6 +334,43 @@ paths:
               schema:
                 $ref: "#/components/schemas/Error"
 
+  /v2/orgs:
+    get:
+      operationId: get-organizations
+      summary: Fetch organizations
+      description: Fetch organizations
+      tags:
+        - Organizations
+      parameters:
+        - in: query
+          name: page_size
+          description: Page size
+          required: false
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Organizations
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/Page"
+                  - type: object
+                    required:
+                      - results
+                    properties:
+                      results:
+                        type: array
+                        items:
+                          $ref: "#/components/schemas/Organization"
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
   /v2/orgs/{organization}:
     get:
       operationId: get-organization
