@@ -1,3 +1,4 @@
+import { useClient } from "../client";
 import "../styles/markdown.css";
 import { Clear, Search } from "@mui/icons-material";
 import {
@@ -9,9 +10,20 @@ import {
   Select,
   TextField,
 } from "@mui/material";
+import { useEffect, useState } from "react";
 import { NavLink } from "react-router-dom";
 
 export default function (): JSX.Element {
+  const [namespace, setNamespace] = useState<string>("username");
+  const [namespaces, setNamespaces] = useState<string[]>(["username"]);
+
+  const client = useClient();
+  useEffect(() => {
+    client.organizations.getOrganizations(200).then((x) => {
+      setNamespaces(["username", ...x.results.map((y) => y.orgname)]);
+    });
+  }, []);
+
   return (
     <div
       className="flex flex-col grow p-3 pt-7"
@@ -19,22 +31,17 @@ export default function (): JSX.Element {
     >
       <header className="flex items-center space-x-4">
         <Select
-          defaultValue="newest"
+          value={namespace}
+          onChange={(e) => setNamespace(e.target.value)}
           size="small"
+          className="self-start"
           sx={{ backgroundColor: "#fbfbfc", fontSize: "12px" }}
         >
-          <MenuItem value="newest" sx={{ fontSize: "12px" }}>
-            Newest
-          </MenuItem>
-          <MenuItem value="oldest" sx={{ fontSize: "12px" }}>
-            Oldest
-          </MenuItem>
-          <MenuItem value="a-z" sx={{ fontSize: "12px" }}>
-            A-Z
-          </MenuItem>
-          <MenuItem value="z-a" sx={{ fontSize: "12px" }}>
-            Z-A
-          </MenuItem>
+          {namespaces.map((x) => (
+            <MenuItem key={x} value={x} sx={{ fontSize: "12px" }}>
+              {x}
+            </MenuItem>
+          ))}
         </Select>
         <TextField
           size="small"
@@ -57,7 +64,7 @@ export default function (): JSX.Element {
             style: { fontSize: "12px" },
           }}
         />
-        <NavLink to="/repository/create?namespace=ramonkulasdasd">
+        <NavLink to={`/repository/create?namespace=${namespace}`}>
           <Button variant="contained" style={{ textTransform: "none" }}>
             Create repository
           </Button>

@@ -16,11 +16,14 @@ import {
   TextField,
 } from "@mui/material";
 import { useCallback, useEffect, useState } from "react";
-import { NavLink, useNavigate } from "react-router-dom";
+import { NavLink, useNavigate, useSearchParams } from "react-router-dom";
 
 export default function (): JSX.Element {
-  const [namespace, setNamespace] = useState<string>("username");
-  const [namespaces, setNamespaces] = useState<string[]>(["username"]);
+  const [search] = useSearchParams();
+  const requestedNamespace = search.get("namespace");
+
+  const [namespace, setNamespace] = useState<string>();
+  const [namespaces, setNamespaces] = useState<string[]>([]);
   const [name, setName] = useState<string>("");
   const [nameError, setNameError] = useState<string>();
   const [description, setDescription] = useState<string>("");
@@ -30,7 +33,13 @@ export default function (): JSX.Element {
   const client = useClient();
   useEffect(() => {
     client.organizations.getOrganizations(200).then((x) => {
-      setNamespaces(["username", ...x.results.map((y) => y.orgname)]);
+      const namespaces = ["username", ...x.results.map((y) => y.orgname)];
+      setNamespaces(namespaces);
+      if (requestedNamespace && namespaces.includes(requestedNamespace)) {
+        setNamespace(requestedNamespace);
+      } else {
+        setNamespace(namespaces[0]);
+      }
     });
   }, []);
 
