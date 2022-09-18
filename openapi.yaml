@@ -882,6 +882,14 @@ components:
           type: string
     CreateRepositoryRequest:
       type: object
+      required:
+        - namespace
+        - registry
+        - image
+        - name
+        - description
+        - privacy
+        - is_private
       properties:
         namespace:
           type: string
@@ -896,29 +904,5 @@ components:
         privacy:
           type: string
           enum: ["public", "private"]
-        provider:
-          type: string
-          nullable: true
-        build_settings:
-          type: array
-          items:
-            $ref: "#/components/schemas/BuildSettings"
         is_private:
-          type: boolean
-    BuildSettings:
-      type: object
-      properties:
-        nocache:
-          type: boolean
-        build_context:
-          type: string
-        source_type:
-          type: string
-        tag:
-          type: string
-        dockerfile:
-          type: string
-        source_name:
-          type: string
-        autobuild:
           type: boolean
