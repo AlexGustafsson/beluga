@@ -91,6 +91,20 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Error"
+  /v2/repositories:
+    post:
+      operationId: post-repositories
+      summary: Create a repository
+      description: Create a repository
+      tags:
+        - Repositories
+      requestBody:
+        description: Repository to create
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateRepositoryRequest"
   /v2/repositories/{namespace}:
     get:
       operationId: get-repositories
@@ -829,3 +843,45 @@ components:
           type: string
         name:
           type: string
+    CreateRepositoryRequest:
+      type: object
+      properties:
+        namespace:
+          type: string
+        registry:
+          type: string
+        image:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+        privacy:
+          type: string
+          enum: ["public", "private"]
+        provider:
+          type: string
+          nullable: true
+        build_settings:
+          type: array
+          items:
+            $ref: "#/components/schemas/BuildSettings"
+        is_private:
+          type: boolean
+    BuildSettings:
+      type: object
+      properties:
+        nocache:
+          type: boolean
+        build_context:
+          type: string
+        source_type:
+          type: string
+        tag:
+          type: string
+        dockerfile:
+          type: string
+        source_name:
+          type: string
+        autobuild:
+          type: boolean
