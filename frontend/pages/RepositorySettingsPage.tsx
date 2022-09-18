@@ -2,7 +2,7 @@ import BreadcrumbSeparator from "../components/BreadcrumbSeparator";
 import "../styles/markdown.css";
 import { Schedule } from "@mui/icons-material";
 import { Breadcrumbs, Card, Divider, Stack, Tab, Tabs } from "@mui/material";
-import { NavLink, Outlet, useLocation, useParams } from "react-router-dom";
+import { NavLink, Outlet, useParams } from "react-router-dom";
 
 export function RepositoryGeneralSettingsPage() {
   return (
@@ -43,27 +43,25 @@ export function RepositoryTagsSettingsPage() {
   return <p>Tags</p>;
 }
 
-export function RepositoryBuildsSettingsPage() {
-  return <p>Builds</p>;
-}
-
-export function RepositoryCollaboratorsSettingsPage() {
-  return <p>Collaborators</p>;
-}
-
-export function RepositoryWebhooksSettingsPage() {
-  return <p>Webhooks</p>;
-}
-
 export function RepositorySettingsSettingsPage() {
   return <p>Settings</p>;
+}
+
+function useSubPage(
+  available: string[],
+  defaultPage?: string
+): string | undefined {
+  const page = location.pathname.replace(/\/$/, "").split("/").pop()!;
+  if (available.includes(page)) {
+    return page;
+  }
+  return defaultPage;
 }
 
 export default function (): JSX.Element {
   const { namespace, repositoryName } = useParams();
 
-  const location = useLocation();
-  const tab = location.pathname.replace(/\/$/, "").split("/").pop();
+  const tab = useSubPage(["general", "tags", "settings"], "general");
 
   return (
     <div className="flex flex-col grow">
@@ -98,27 +96,6 @@ export default function (): JSX.Element {
           to="tags"
           value="tags"
           label="Tags"
-          sx={{ padding: "20px", textTransform: "capitalize" }}
-        />
-        <Tab
-          component={NavLink}
-          to="builds"
-          value="builds"
-          label="Builds"
-          sx={{ padding: "20px", textTransform: "capitalize" }}
-        />
-        <Tab
-          component={NavLink}
-          to="collaborators"
-          value="collaborators"
-          label="Collaborators"
-          sx={{ padding: "20px", textTransform: "capitalize" }}
-        />
-        <Tab
-          component={NavLink}
-          to="webhooks"
-          value="webhooks"
-          label="Webhooks"
           sx={{ padding: "20px", textTransform: "capitalize" }}
         />
         <Tab

@@ -7,12 +7,9 @@ import OrganizationsPage from "./OrganizationsPage";
 import RepositoriesPage from "./RepositoriesPage";
 import RepositoryPage from "./RepositoryPage";
 import RepositorySettingsPage, {
-  RepositoryBuildsSettingsPage,
-  RepositoryCollaboratorsSettingsPage,
   RepositoryGeneralSettingsPage,
   RepositorySettingsSettingsPage,
   RepositoryTagsSettingsPage,
-  RepositoryWebhooksSettingsPage,
 } from "./RepositorySettingsPage";
 import SettingsPage from "./SettingsPage";
 import UserProfilePage from "./UserProfilePage";
@@ -132,12 +129,6 @@ export default function (): JSX.Element {
           <Route index element={<RepositoryGeneralSettingsPage />} />
           <Route path="general" element={<RepositoryGeneralSettingsPage />} />
           <Route path="tags" element={<RepositoryTagsSettingsPage />} />
-          <Route path="builds" element={<RepositoryBuildsSettingsPage />} />
-          <Route
-            path="collaborators"
-            element={<RepositoryCollaboratorsSettingsPage />}
-          />
-          <Route path="webhooks" element={<RepositoryWebhooksSettingsPage />} />
           <Route path="settings" element={<RepositorySettingsSettingsPage />} />
         </Route>
       </Routes>

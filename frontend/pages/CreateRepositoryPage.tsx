@@ -74,24 +74,12 @@ export default function (): JSX.Element {
   const submit = useCallback(() => {
     client.repositories
       .postRepositories({
-        namespace: namespace,
+        namespace: namespace!,
         registry: "beluga",
         image: `${namespace}/${name}`,
         name: name,
         description: description,
         privacy: visibility,
-        provider: null,
-        build_settings: [
-          {
-            nocache: false,
-            build_context: "/",
-            source_type: "Branch",
-            tag: "latest",
-            dockerfile: "Dockerfile",
-            source_name: "master",
-            autobuild: true,
-          },
-        ],
         is_private: visibility === "private",
       })
       .then(() => {
