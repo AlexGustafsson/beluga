@@ -9,7 +9,6 @@ export { CancelablePromise, CancelError } from './core/CancelablePromise';
 export { OpenAPI } from './core/OpenAPI';
 export type { OpenAPIConfig } from './core/OpenAPI';
 
-export type { BuildSettings } from './models/BuildSettings';
 export type { CreateRepositoryRequest } from './models/CreateRepositoryRequest';
 export type { Error } from './models/Error';
 export type { Image } from './models/Image';
