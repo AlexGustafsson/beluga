@@ -1,6 +1,7 @@
 import Search from "../components/Search";
 import CreateRepositoryPage from "./CreateRepositoryPage";
 import ExplorePage from "./ExplorePage";
+import FullPageLoading from "./FullPageLoading";
 import HomePage from "./HomePage";
 import ImagePage from "./ImagePage";
 import OrganizationsPage from "./OrganizationsPage";
@@ -27,10 +28,8 @@ export default function (): JSX.Element {
   const { error, user, isAuthenticated, isLoading, loginWithRedirect, logout } =
     useAuth0();
 
-  console.log(isLoading, isAuthenticated, error);
-
   if (isLoading) {
-    return <div>Loading...</div>;
+    return <FullPageLoading />;
   }
 
   if (error) {
