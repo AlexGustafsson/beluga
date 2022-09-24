@@ -1,0 +1,121 @@
+###############################################################
+#                   Authelia configuration                    #
+###############################################################
+
+jwt_secret: a_very_important_secret
+default_redirection_url: http://localhost:3000
+
+server:
+  host: 0.0.0.0
+  port: 9091
+
+log:
+  level: debug
+# This secret can also be set using the env variables AUTHELIA_JWT_SECRET_FILE
+
+totp:
+  issuer: authelia.com
+
+authentication_backend:
+  file:
+    path: /config/users_database.yml
+
+access_control:
+  default_policy: one_factor
+
+session:
+  name: authelia_session
+  # This secret can also be set using the env variables AUTHELIA_SESSION_SECRET_FILE
+  secret: unsecure_session_secret
+  expiration: 3600 # 1 hour
+  inactivity: 300 # 5 minutes
+  domain: example.com # Should match whatever your root protected domain is
+
+regulation:
+  max_retries: 3
+  find_time: 120
+  ban_time: 300
+
+storage:
+  encryption_key: you_must_generate_a_random_string_of_more_than_twenty_chars_and_configure_this
+  local:
+    path: /config/db.sqlite3
+
+notifier:
+  filesystem:
+    filename: /config/notification.txt
+
+identity_providers:
+  oidc:
+    hmac_secret: this_is_a_secret_abc123abc123abc
+    issuer_private_key: |
+      -----BEGIN RSA PRIVATE KEY-----
+      MIIEpAIBAAKCAQEA63qHRElzwB1xKOt4E0LaYC8tuXQd5YbOvNCLhJLM/IKFmosU
+      5jbv0wGf8U8rG7O17n1JhQOLFZ/oEz59evyAUT99Tgm+T0pkSCpLKwQ1SvaBp6Dl
+      6Sci0lpfAbJ1dE4kPF04z5JNRS0IKGlp3by0cuQsv1RYiCMEQcisN2YRWQNdQ8u1
+      6wAjeY1lRIaCaVo89wysfAPFuXyW9KbmDjq2EZ9reFVKAblqr3gk7sds9eU7Utyv
+      UK0WwutSQB4Hyje1FU1MhyXDZZgfLgRY+Bcrv6hV7y/YdHptRBjDfJattWAndm9H
+      ACWF68SYs2bBEik9z0E5DPlNCaGKxU/1aWEZPQIDAQABAoIBACI6Pysn2hFUtjwS
+      bfOuxfsxIF5SiH3yaF59man9hJo3hp/+E12bIqTzGYKD1WpDZvBxeZxB9ZeBFMSn
+      UqnrxeMJbXdIZ0czMvxiWWa5R93LkvEArCqFq8QTqreebwAm05GKo1VYmK6zavok
+      yGSYp0oD7JUq92tiW54MQywSQ/dCBIa0PwGpvweoDrVT9nyui8rrrsGsuOrVZ/0v
+      2u181ZvVDUY72L1pOuo+aGWT126FO3FUITxJx6UXKrkBKWDqWFQFaqHD027i3LYm
+      uPHvy/PpEF1BZFgPGLau/SqMwFoAlCRXdr0RdVEBJDm0GE5EeDWABjp3AQj24QiM
+      VPifcCkCgYEA/JK3iNKo0Zd8eiGfzDKN6yw99C6+SMWAp+dYMfpb5Gjr5IZp1fSo
+      H52ZfVIgSDNb9LohQy34P//p7DCjR2jOCxRtCMaVgs10m375S8Bl49xbNGmCzw1+
+      Uz0xAm/zJBYpMe1w7IEb6F5e2iwh0oUQDeF6fjBu6ZZEy7bFywK9QL8CgYEA7qxv
+      jg7qP01stayH5+nNwggYClaHsHSKLoMSnEj6vQCB1aaW1BB0V2Rj/EPNOTpgKOmw
+      A0NADA5WfHf3z9uWq9ItGzHZ6HuXPm34UWfUmJIrNXQ26QHYxMoEZ9c3Q/+c6h2r
+      jZiP+WUFSbZKMuiOWCIDQc8ETTMwnpvOORolaQMCgYEAxwfm0U8P8XnqgWOVxRfh
+      dfz7JTzgfgAFDkrj2R5s42U63m59YDjXc3KBzZu2DK9MO2GhbIsBIY3NDG6XfGI+
+      W8TQ1yWGE/lLdm1sjiEjKZgv1vF+PyNm9Lk3sa/+beV4uPtfDUAAefBD1rEIRhjN
+      OeMA4AfSnwfnVpDE9OFHuYkCgYEAm7d5GM/2WNKk6GrmSJKsIbmyJZyK7r86IFp3
+      2+tpW8Jm8wO7SCRsI1BmQ4Hg9UN21XqR0a8grDz2hEKpNb3osbVwpFuD9kAcTyjk
+      aAg8FkbXVgq6gI8p5EqBUVaCwiSVNdGhycINvQMBzjPWeRxtMmcOhPMRtWR+hhzV
+      EUBTxA0CgYBkTE/aA0jmeZxGBgaNnatWyWSH0FWXWtPXNU1wYPoA8SKqos2c8Ez+
+      GoXlctI9On2pebKiE22t2xi8rC3Utj+0IC8CxN7wEomYYZroNuYO82dhBKtlqxUE
+      F6ofx0+d6tj4xrTYlUA9EoojsQIC77bYIooMD7eW+1b+UBUWn/la0g==
+      -----END RSA PRIVATE KEY-----
+    access_token_lifespan: 1h
+    authorize_code_lifespan: 1m
+    id_token_lifespan: 1h
+    refresh_token_lifespan: 90m
+    enable_client_debug_messages: true
+    enforce_pkce: never
+    cors:
+      endpoints:
+        - authorization
+        - token
+        - revocation
+        - introspection
+      allowed_origins:
+        - http://localhost:3000
+        - http://localhost:8080
+        - https://oidcdebugger.com
+      allowed_origins_from_client_redirect_uris: false
+    clients:
+      - id: myapp
+        description: My Application
+        sector_identifier: ""
+        public: true
+        authorization_policy: one_factor
+        pre_configured_consent_duration: ""
+        audience: []
+        scopes:
+          - openid
+          - groups
+          - email
+          - profile
+        redirect_uris:
+          - http://localhost:8080/oauth2/callback
+          - https://oidcdebugger.com/debug
+        grant_types:
+          - refresh_token
+          - authorization_code
+        response_types:
+          - code
+        response_modes:
+          - form_post
+          - query
+          - fragment
+        userinfo_signing_algorithm: none
