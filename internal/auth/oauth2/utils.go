@@ -2,7 +2,7 @@ package oauth2
 
 import (
 	"crypto/rand"
-	"encoding/hex"
+	"encoding/base64"
 )
 
 func GenerateCode() (string, error) {
@@ -11,5 +11,5 @@ func GenerateCode() (string, error) {
 		return "", err
 	}
 
-	return hex.EncodeToString(buffer[:]), nil
+	return base64.RawURLEncoding.EncodeToString(buffer[:]), nil
 }
