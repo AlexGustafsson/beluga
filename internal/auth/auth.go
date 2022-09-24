@@ -6,11 +6,14 @@ import (
 	"encoding/json"
 	"net/http"
 	"net/url"
+	"text/template"
 	"time"
 
 	"github.com/AlexGustafsson/beluga/internal/auth/oauth2"
 	"github.com/AlexGustafsson/beluga/internal/logging"
 	"go.uber.org/zap"
+
+	_ "embed" // Embed files
 )
 
 type Authorizer struct {
@@ -34,6 +37,9 @@ type TokenResponse struct {
 	LifetimeSeconds int    `json:"expires_in"`
 	TokenType       string `json:"token_type"`
 }
+
+//go:embed webmessage.html
+var webmessageTemplate string
 
 func NewAuthorizer(log logging.Logger) *Authorizer {
 	clients := oauth2.ClientStoreFunc(func(id string) (*oauth2.Client, error) {
@@ -78,6 +84,8 @@ func (a *Authorizer) Authorize(w http.ResponseWriter, r *http.Request) {
 	codeChallenge := query.Get("code_challange")
 	codeChallangeMethod := query.Get("code_challenge_method")
 	nonce := query.Get("nonce")
+	webMessageURI := query.Get("web_message_uri")
+	webMessageTarget := query.Get("web_message_target")
 	// prompt := query.Get("prompt")
 
 	redirectURI, err := url.Parse(redirectURIString)
@@ -88,7 +96,7 @@ func (a *Authorizer) Authorize(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Only support what's provided by the Auth0 SPA client
-	if responseMode != "query" {
+	if responseMode != "query" && responseMode != "web_message" {
 		http.Error(w, "bad request", http.StatusBadRequest)
 		return
 	}
@@ -123,13 +131,36 @@ func (a *Authorizer) Authorize(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	redirectURIQuery := redirectURI.Query()
-	redirectURIQuery.Add("code", code)
-	redirectURIQuery.Add("state", state)
-	redirectURI.RawQuery = redirectURIQuery.Encode()
+	if responseMode == "query" {
+		redirectURIQuery := redirectURI.Query()
+		redirectURIQuery.Add("code", code)
+		redirectURIQuery.Add("state", state)
+		redirectURI.RawQuery = redirectURIQuery.Encode()
 
-	w.Header().Set("Location", redirectURI.String())
-	w.WriteHeader(http.StatusTemporaryRedirect)
+		w.Header().Set("Location", redirectURI.String())
+		w.WriteHeader(http.StatusTemporaryRedirect)
+	} else if responseMode == "web_message" {
+		// See: https://auth0.com/docs/authenticate/login/configure-silent-authentication
+		// See: https://datatracker.ietf.org/doc/html/draft-sakimura-oauth-wmrm-00
+		t, err := template.New("").Parse(webmessageTemplate)
+		if err != nil {
+			a.log.Error("Failed to parse web message template", zap.Error(err))
+			http.Error(w, "internal server error", http.StatusInternalServerError)
+			return
+		}
+
+		w.Header().Set("Content-Type", "text/html; charset=UTF-8")
+		t.Execute(w, map[string]any{
+			"targetOrigin":     redirectURI,
+			"state":            state,
+			"code":             code,
+			"webMessageURI":    webMessageURI,
+			"webMessageTarget": webMessageTarget,
+		})
+	} else {
+		http.Error(w, "bad request", http.StatusBadRequest)
+		return
+	}
 }
 
 func (a *Authorizer) Token(w http.ResponseWriter, r *http.Request) {
