@@ -13,6 +13,7 @@ import RepositorySettingsPage, {
 } from "./RepositorySettingsPage";
 import SettingsPage from "./SettingsPage";
 import UserProfilePage from "./UserProfilePage";
+import { useAuth0 } from "@auth0/auth0-react";
 import { KeyboardArrowDown } from "@mui/icons-material";
 import { Button, Divider, Menu, MenuItem } from "@mui/material";
 import { useRef, useState } from "react";
@@ -23,7 +24,18 @@ export default function (): JSX.Element {
   const [profileMenuOpen, setProfileMenuOpen] = useState<boolean>(false);
 
   // TODO: Implement user handling
-  const [username, setUsername] = useState<string | undefined>("joedoe");
+  const { error, user, isAuthenticated, isLoading, loginWithRedirect, logout } =
+    useAuth0();
+
+  console.log(isLoading, isAuthenticated, error);
+
+  if (isLoading) {
+    return <div>Loading...</div>;
+  }
+
+  if (error) {
+    return <div>{error.message}</div>;
+  }
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -50,7 +62,7 @@ export default function (): JSX.Element {
               Explore
             </Button>
           </NavLink>
-          {username ? (
+          {isAuthenticated ? (
             <>
               <NavLink to="/repositories">
                 <Button color="inherit" style={{ textTransform: "none" }}>
@@ -69,7 +81,7 @@ export default function (): JSX.Element {
                 endIcon={<KeyboardArrowDown />}
                 onClick={() => setProfileMenuOpen(true)}
               >
-                {username}
+                {user?.preferred_username}
               </Button>
               <Menu
                 id="profile-menu"
@@ -78,7 +90,7 @@ export default function (): JSX.Element {
                 onClose={() => setProfileMenuOpen(false)}
               >
                 <NavLink
-                  to={`/u/${username}`}
+                  to={`/u/${user?.preferred_username}`}
                   onClick={() => setProfileMenuOpen(false)}
                 >
                   <MenuItem>My Profile</MenuItem>
@@ -90,17 +102,21 @@ export default function (): JSX.Element {
                 >
                   <MenuItem>Account Settings</MenuItem>
                 </NavLink>
-                <MenuItem onClick={() => setProfileMenuOpen(false)}>
+                <MenuItem
+                  onClick={() => logout({ returnTo: window.location.origin })}
+                >
                   Sign Out
                 </MenuItem>
               </Menu>
             </>
           ) : (
-            <NavLink to="/login">
-              <Button color="inherit" style={{ textTransform: "none" }}>
-                Sign In
-              </Button>
-            </NavLink>
+            <Button
+              color="inherit"
+              style={{ textTransform: "none" }}
+              onClick={() => loginWithRedirect()}
+            >
+              Sign In
+            </Button>
           )}
         </div>
       </header>

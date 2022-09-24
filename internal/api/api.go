@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/AlexGustafsson/beluga/internal/auth"
 	"github.com/AlexGustafsson/beluga/internal/logging"
 	"github.com/AlexGustafsson/beluga/internal/store"
 	"github.com/gorilla/handlers"
@@ -14,18 +15,25 @@ import (
 //go:generate oapi-codegen --config ../../oapi-codegen.yaml ../../openapi.yaml
 
 type API struct {
-	store   *store.Store
-	log     logging.Logger
-	handler http.Handler
+	store      *store.Store
+	log        logging.Logger
+	handler    http.Handler
+	authorizer *auth.Authorizer
 }
 
 func New(store *store.Store, log logging.Logger) *API {
 	api := &API{
-		store: store,
-		log:   log,
+		store:      store,
+		log:        log,
+		authorizer: auth.NewAuthorizer(log),
 	}
 
-	api.handler = handlers.CORS(handlers.AllowedOrigins([]string{"*"}))(HandlerFromMux(api, mux.NewRouter()))
+	router := mux.NewRouter()
+	router.HandleFunc("/authorize", api.Authorize).Methods(http.MethodGet)
+	router.HandleFunc("/oauth/token", api.Token).Methods(http.MethodPost)
+	router.HandleFunc("/v2/logout", api.Logout).Methods(http.MethodGet)
+
+	api.handler = handlers.CORS(handlers.AllowedOrigins([]string{"*"}), handlers.AllowedHeaders([]string{"Auth0-Client", "Content-Type"}))(HandlerFromMux(api, router))
 
 	return api
 }

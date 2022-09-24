@@ -1,3 +1,4 @@
+import Auth0ProviderWithHistory from "./components/Auth0ProviderWithHistory";
 import "./main.css";
 import App from "./pages/App";
 import { ThemeProvider } from "@emotion/react";
@@ -42,9 +43,14 @@ if (root) {
   createRoot(root).render(
     <React.StrictMode>
       <BrowserRouter>
-        <ThemeProvider theme={theme}>
-          <App />
-        </ThemeProvider>
+        <Auth0ProviderWithHistory
+          domain="http://localhost:8081"
+          clientId="61ce816dd7194b4bbbbb41ed55e102b3"
+        >
+          <ThemeProvider theme={theme}>
+            <App />
+          </ThemeProvider>
+        </Auth0ProviderWithHistory>
       </BrowserRouter>
     </React.StrictMode>
   );

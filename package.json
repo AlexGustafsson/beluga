@@ -6,6 +6,7 @@
     "format": "prettier --write \"**/*.{ts,tsx,js,json,yml}\""
   },
   "dependencies": {
+    "@auth0/auth0-react": "^1.11.0",
     "@emotion/react": "^11.10.0",
     "@emotion/styled": "^11.10.0",
     "@fontsource/open-sans": "^4.5.10",
