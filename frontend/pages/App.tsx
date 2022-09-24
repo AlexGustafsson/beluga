@@ -148,9 +148,61 @@ export default function (): JSX.Element {
         </Route>
       </Routes>
       <footer
-        className="flex h-96 px-6 py-10"
+        className="px-6 py-10"
         style={{ backgroundColor: "rgb(2, 33, 68)" }}
-      ></footer>
+      >
+        <div className="flex">
+          <div className="text-white px-4">
+            <h3 className="font-medium">Beluga</h3>
+            <ul className="font-light text-sm flex flex-col space-y-2 mt-2">
+              <NavLink to="/" className="hover:opacity-100 opacity-60">
+                <li>Home</li>
+              </NavLink>
+            </ul>
+          </div>
+          <div className="text-white px-4">
+            <h3 className="font-medium">Support</h3>
+            <ul className="font-light text-sm flex flex-col space-y-2 mt-2">
+              <NavLink to="/docs" className="hover:opacity-100 opacity-60">
+                <li>Documentation</li>
+              </NavLink>
+              <a
+                href="https://github.com/AlexGustafsson/beluga/issues"
+                target="_blank"
+                className="hover:opacity-100 opacity-60"
+              >
+                <li>GitHub Issues</li>
+              </a>
+            </ul>
+          </div>
+          <div className="text-white px-4">
+            <h3 className="font-medium">Developers</h3>
+            <ul className="font-light text-sm flex flex-col space-y-2 mt-2">
+              <a
+                href="https://github.com/AlexGustafsson/beluga"
+                target="_blank"
+                className="hover:opacity-100 opacity-60"
+              >
+                <li>Getting Started</li>
+              </a>
+              <a
+                href="https://github.com/AlexGustafsson/beluga"
+                target="_blank"
+                className="hover:opacity-100 opacity-60"
+              >
+                <li>Contributing</li>
+              </a>
+              <a
+                href="https://github.com/AlexGustafsson/beluga/issues"
+                target="_blank"
+                className="hover:opacity-100 opacity-60"
+              >
+                <li>GitHub Issues</li>
+              </a>
+            </ul>
+          </div>
+        </div>
+      </footer>
     </div>
   );
 }
