@@ -94,7 +94,7 @@ export function RepositoryTagPage(): JSX.Element {
 
   const client = useClient();
   useEffect(() => {
-    client.repositories.getTags(namespace, repositoryName).then((x) => {
+    client.repositories.getTags(namespace!, repositoryName).then((x) => {
       setPages(Math.ceil(x.count / x.page_size));
       setResults(x.results);
       setTotalResults(x.count);
@@ -149,7 +149,7 @@ export function RepositoryTagPage(): JSX.Element {
         {results.map((x) => (
           <TagCard
             key={x.name}
-            namespace={namespace}
+            namespace={namespace!}
             repositoryName={repositoryName}
             value={x}
           />

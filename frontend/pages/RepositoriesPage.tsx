@@ -1,5 +1,6 @@
 import { Repository, useClient } from "../client";
 import "../styles/markdown.css";
+import { useAuth0 } from "@auth0/auth0-react";
 import {
   Clear,
   Download,
@@ -22,14 +23,21 @@ import { useEffect, useState } from "react";
 import { NavLink } from "react-router-dom";
 
 export default function (): JSX.Element {
-  const [namespace, setNamespace] = useState<string>("username");
-  const [namespaces, setNamespaces] = useState<string[]>(["username"]);
+  const { user } = useAuth0();
+
+  const [namespace, setNamespace] = useState<string>(user?.preferred_username!);
+  const [namespaces, setNamespaces] = useState<string[]>([
+    user?.preferred_username!,
+  ]);
   const [repositories, setRepositories] = useState<Repository[]>([]);
 
   const client = useClient();
   useEffect(() => {
     client.organizations.getOrganizations(200).then((x) => {
-      setNamespaces(["username", ...x.results.map((y) => y.orgname)]);
+      setNamespaces([
+        user?.preferred_username!,
+        ...x.results.map((y) => y.orgname),
+      ]);
     });
   }, []);
 

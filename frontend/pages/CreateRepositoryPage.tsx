@@ -1,6 +1,7 @@
 import { useClient } from "../client";
 import BreadcrumbSeparator from "../components/BreadcrumbSeparator";
 import "../styles/markdown.css";
+import { useAuth0 } from "@auth0/auth0-react";
 import { Lock, Public } from "@mui/icons-material";
 import {
   Breadcrumbs,
@@ -22,18 +23,30 @@ export default function (): JSX.Element {
   const [search] = useSearchParams();
   const requestedNamespace = search.get("namespace");
 
-  const [namespace, setNamespace] = useState<string>();
-  const [namespaces, setNamespaces] = useState<string[]>([]);
+  const { user } = useAuth0();
+
+  const [namespace, setNamespace] = useState<string>(user?.preferred_username!);
+  const [namespaces, setNamespaces] = useState<string[]>([
+    user?.preferred_username!,
+  ]);
   const [name, setName] = useState<string>("");
   const [nameError, setNameError] = useState<string>();
   const [description, setDescription] = useState<string>("");
   const [descriptionError, setDescriptionError] = useState<string>();
   const [visibility, setVisibility] = useState<"public" | "private">("public");
 
+  const [isCreating, setIsCreating] = useState<boolean>(false);
+
+  const canCreate =
+    !isCreating && nameError === undefined && descriptionError === undefined;
+
   const client = useClient();
   useEffect(() => {
     client.organizations.getOrganizations(200).then((x) => {
-      const namespaces = ["username", ...x.results.map((y) => y.orgname)];
+      const namespaces = [
+        user?.preferred_username!,
+        ...x.results.map((y) => y.orgname),
+      ];
       setNamespaces(namespaces);
       if (requestedNamespace && namespaces.includes(requestedNamespace)) {
         setNamespace(requestedNamespace);
@@ -72,9 +85,11 @@ export default function (): JSX.Element {
   const navigate = useNavigate();
 
   const submit = useCallback(() => {
+    setIsCreating(true);
+
     client.repositories
       .postRepositories({
-        namespace: namespace!,
+        namespace: namespace,
         registry: "beluga",
         image: `${namespace}/${name}`,
         name: name,
@@ -84,6 +99,9 @@ export default function (): JSX.Element {
       })
       .then(() => {
         navigate(`/repository/beluga/${namespace}/${name}`);
+      })
+      .catch(() => {
+        setIsCreating(false);
       });
   }, [namespace, name, description, visibility]);
 
@@ -131,6 +149,11 @@ export default function (): JSX.Element {
               className="grow"
               placeholder="Name"
               variant="standard"
+              InputProps={{
+                sx: {
+                  fontSize: "14px",
+                },
+              }}
             />
           </Stack>
           <TextField
@@ -140,6 +163,11 @@ export default function (): JSX.Element {
             onChange={(e) => setDescription(e.target.value)}
             placeholder="Description"
             variant="standard"
+            InputProps={{
+              sx: {
+                fontSize: "14px",
+              },
+            }}
           />
           <h2 className="text-lg font-medium !mt-16">Visibility</h2>
           <FormControl>
@@ -202,7 +230,7 @@ export default function (): JSX.Element {
               </Button>
             </NavLink>
             <Button
-              disabled={name === ""}
+              disabled={!canCreate}
               variant="contained"
               style={{ textTransform: "none" }}
               onClick={submit}
@@ -225,7 +253,8 @@ export default function (): JSX.Element {
             docker push new-repo:tagname
           </code>
           <p className="text-sm">
-            Make sure to change tagname with your desired image repository tag.
+            Make sure to change <span className="italic">tagname</span> with
+            your desired image repository tag.
           </p>
         </aside>
       </div>
