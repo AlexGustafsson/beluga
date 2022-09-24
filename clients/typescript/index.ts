@@ -17,6 +17,7 @@ export type { Label } from './models/Label';
 export type { Layer } from './models/Layer';
 export type { Logo } from './models/Logo';
 export type { Organization } from './models/Organization';
+export type { OrganizationsPage } from './models/OrganizationsPage';
 export type { Page } from './models/Page';
 export type { Publisher } from './models/Publisher';
 export type { Repository } from './models/Repository';

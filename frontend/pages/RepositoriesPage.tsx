@@ -1,6 +1,13 @@
-import { useClient } from "../client";
+import { Repository, useClient } from "../client";
 import "../styles/markdown.css";
-import { Clear, Search } from "@mui/icons-material";
+import {
+  Clear,
+  Download,
+  Lock,
+  Public,
+  Search,
+  StarBorder,
+} from "@mui/icons-material";
 import {
   Button,
   Card,
@@ -8,6 +15,7 @@ import {
   InputAdornment,
   MenuItem,
   Select,
+  Stack,
   TextField,
 } from "@mui/material";
 import { useEffect, useState } from "react";
@@ -16,6 +24,7 @@ import { NavLink } from "react-router-dom";
 export default function (): JSX.Element {
   const [namespace, setNamespace] = useState<string>("username");
   const [namespaces, setNamespaces] = useState<string[]>(["username"]);
+  const [repositories, setRepositories] = useState<Repository[]>([]);
 
   const client = useClient();
   useEffect(() => {
@@ -23,6 +32,13 @@ export default function (): JSX.Element {
       setNamespaces(["username", ...x.results.map((y) => y.orgname)]);
     });
   }, []);
+
+  useEffect(() => {
+    // TODO: Pagination
+    client.repositories.getRepositories(namespace).then((x) => {
+      setRepositories(x.results);
+    });
+  }, [namespace]);
 
   return (
     <div
@@ -65,15 +81,59 @@ export default function (): JSX.Element {
           }}
         />
         <NavLink to={`/repository/create?namespace=${namespace}`}>
-          <Button variant="contained" style={{ textTransform: "none" }}>
+          <Button
+            variant="contained"
+            style={{ textTransform: "none" }}
+            className="self-end"
+          >
             Create repository
           </Button>
         </NavLink>
       </header>
-      <Card className="p-5 mt-5">
+      {repositories.map((repository) => (
+        <NavLink
+          to={`/repository/docker/${repository.namespace}/${repository.name}`}
+          key={`${repository.namespace}/${repository.name}`}
+        >
+          <Card
+            className="p-5 mt-5 flex flex-row items-center"
+            sx={{ color: "#445E6E" }}
+          >
+            <Stack className="grow">
+              <p className="text-sm">
+                {repository.namespace} /{" "}
+                <span className="font-bold">{repository.name}</span>
+              </p>
+              <p className="text-xs">Last pushed: 2 hours ago</p>
+            </Stack>
+            <Stack direction="row" className="mx-4 space-x-1 items-center">
+              <StarBorder sx={{ width: "20px", height: "20px" }} />
+              <p className="text-sm">{repository.star_count}</p>
+            </Stack>
+            <Stack direction="row" className="mx-4 space-x-1 items-center">
+              <Download sx={{ width: "20px", height: "20px" }} />
+              <p className="text-sm">{repository.pull_count}</p>
+            </Stack>
+            <Stack direction="row" className="mx-4 space-x-1 items-center">
+              {repository.is_private ? (
+                <Lock sx={{ width: "20px", height: "20px" }} />
+              ) : (
+                <Public sx={{ width: "20px", height: "20px" }} />
+              )}
+              <p className="text-sm">
+                {repository.is_private ? "Private" : "Public"}
+              </p>
+            </Stack>
+          </Card>
+        </NavLink>
+      ))}
+      <Card className="p-5 mt-5 text-sm">
+        {repositories.length === 0 && (
+          <p>There are no repositories in this namespace.</p>
+        )}
         <p>
-          There are no repositories in this namespace. Tip: Not finding your
-          repository? Try switching namespace via the top left dropdown.
+          Tip: Not finding your repository? Try switching namespace via the top
+          left dropdown.
         </p>
       </Card>
     </div>

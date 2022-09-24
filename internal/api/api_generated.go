@@ -28,6 +28,22 @@ const (
 	SummaryTypeImage SummaryType = "image"
 )
 
+// Defines values for GetOrganizationsParamsOrdering.
+const (
+	GetOrganizationsParamsOrderingLastUpdated      GetOrganizationsParamsOrdering = "last_updated"
+	GetOrganizationsParamsOrderingMinusLastUpdated GetOrganizationsParamsOrdering = "-last_updated"
+	GetOrganizationsParamsOrderingMinusName        GetOrganizationsParamsOrdering = "-name"
+	GetOrganizationsParamsOrderingName             GetOrganizationsParamsOrdering = "name"
+)
+
+// Defines values for GetRepositoriesParamsOrdering.
+const (
+	GetRepositoriesParamsOrderingLastUpdated      GetRepositoriesParamsOrdering = "last_updated"
+	GetRepositoriesParamsOrderingMinusLastUpdated GetRepositoriesParamsOrdering = "-last_updated"
+	GetRepositoriesParamsOrderingMinusName        GetRepositoriesParamsOrdering = "-name"
+	GetRepositoriesParamsOrderingName             GetRepositoriesParamsOrdering = "name"
+)
+
 // Defines values for GetTagsParamsOrdering.
 const (
 	GetTagsParamsOrderingLastUpdated      GetTagsParamsOrdering = "last_updated"
@@ -298,7 +314,31 @@ type GetSearchParams struct {
 type GetOrganizationsParams struct {
 	// PageSize Page size
 	PageSize *int `form:"page_size,omitempty" json:"page_size,omitempty"`
+
+	// Page Page index
+	Page *int `form:"page,omitempty" json:"page,omitempty"`
+
+	// Ordering Sort order
+	Ordering *GetOrganizationsParamsOrdering `form:"ordering,omitempty" json:"ordering,omitempty"`
 }
+
+// GetOrganizationsParamsOrdering defines parameters for GetOrganizations.
+type GetOrganizationsParamsOrdering string
+
+// GetRepositoriesParams defines parameters for GetRepositories.
+type GetRepositoriesParams struct {
+	// PageSize Page size
+	PageSize *int `form:"page_size,omitempty" json:"page_size,omitempty"`
+
+	// Page Page index
+	Page *int `form:"page,omitempty" json:"page,omitempty"`
+
+	// Ordering Sort order
+	Ordering *GetRepositoriesParamsOrdering `form:"ordering,omitempty" json:"ordering,omitempty"`
+}
+
+// GetRepositoriesParamsOrdering defines parameters for GetRepositories.
+type GetRepositoriesParamsOrdering string
 
 // GetTagsParams defines parameters for GetTags.
 type GetTagsParams struct {
@@ -331,7 +371,7 @@ type ServerInterface interface {
 	PostRepositories(w http.ResponseWriter, r *http.Request)
 	// List repositories in a namespace
 	// (GET /v2/repositories/{namespace})
-	GetRepositories(w http.ResponseWriter, r *http.Request, namespace string)
+	GetRepositories(w http.ResponseWriter, r *http.Request, namespace string, params GetRepositoriesParams)
 	// List repositories in a namespace
 	// (GET /v2/repositories/{namespace}/{repository})
 	GetRepository(w http.ResponseWriter, r *http.Request, namespace string, repository string)
@@ -462,6 +502,22 @@ func (siw *ServerInterfaceWrapper) GetOrganizations(w http.ResponseWriter, r *ht
 		return
 	}
 
+	// ------------- Optional query parameter "page" -------------
+
+	err = runtime.BindQueryParameter("form", true, false, "page", r.URL.Query(), &params.Page)
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "page", Err: err})
+		return
+	}
+
+	// ------------- Optional query parameter "ordering" -------------
+
+	err = runtime.BindQueryParameter("form", true, false, "ordering", r.URL.Query(), &params.Ordering)
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "ordering", Err: err})
+		return
+	}
+
 	var handler = func(w http.ResponseWriter, r *http.Request) {
 		siw.Handler.GetOrganizations(w, r, params)
 	}
@@ -529,8 +585,35 @@ func (siw *ServerInterfaceWrapper) GetRepositories(w http.ResponseWriter, r *htt
 		return
 	}
 
+	// Parameter object where we will unmarshal all parameters from the context
+	var params GetRepositoriesParams
+
+	// ------------- Optional query parameter "page_size" -------------
+
+	err = runtime.BindQueryParameter("form", true, false, "page_size", r.URL.Query(), &params.PageSize)
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "page_size", Err: err})
+		return
+	}
+
+	// ------------- Optional query parameter "page" -------------
+
+	err = runtime.BindQueryParameter("form", true, false, "page", r.URL.Query(), &params.Page)
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "page", Err: err})
+		return
+	}
+
+	// ------------- Optional query parameter "ordering" -------------
+
+	err = runtime.BindQueryParameter("form", true, false, "ordering", r.URL.Query(), &params.Ordering)
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "ordering", Err: err})
+		return
+	}
+
 	var handler = func(w http.ResponseWriter, r *http.Request) {
-		siw.Handler.GetRepositories(w, r, namespace)
+		siw.Handler.GetRepositories(w, r, namespace, params)
 	}
 
 	for _, middleware := range siw.HandlerMiddlewares {

@@ -3,6 +3,7 @@
 /* eslint-disable */
 import type { CreateRepositoryRequest } from '../models/CreateRepositoryRequest';
 import type { ImageWithDetails } from '../models/ImageWithDetails';
+import type { Repository } from '../models/Repository';
 import type { RepositoryPage } from '../models/RepositoryPage';
 import type { RepositoryWithDetails } from '../models/RepositoryWithDetails';
 import type { Tag } from '../models/Tag';
@@ -19,16 +20,20 @@ export class RepositoriesService {
    * Create a repository
    * Create a repository
    * @param requestBody Repository to create
+   * @returns Repository Created
    * @throws ApiError
    */
   public postRepositories(
     requestBody: CreateRepositoryRequest,
-  ): CancelablePromise<void> {
+  ): CancelablePromise<Repository> {
     return this.httpRequest.request({
       method: 'POST',
       url: '/v2/repositories',
       body: requestBody,
       mediaType: 'application/json',
+      errors: {
+        500: `Internal server error`,
+      },
     });
   }
 
@@ -36,17 +41,28 @@ export class RepositoriesService {
    * List repositories in a namespace
    * List repositories in a namespace
    * @param namespace User or organization
+   * @param pageSize Page size
+   * @param page Page index
+   * @param ordering Sort order
    * @returns RepositoryPage Repositories
    * @throws ApiError
    */
   public getRepositories(
     namespace: string,
+    pageSize?: number,
+    page?: number,
+    ordering: 'last_updated' | '-last_updated' | 'name' | '-name' = 'last_updated',
   ): CancelablePromise<RepositoryPage> {
     return this.httpRequest.request({
       method: 'GET',
       url: '/v2/repositories/{namespace}',
       path: {
         'namespace': namespace,
+      },
+      query: {
+        'page_size': pageSize,
+        'page': page,
+        'ordering': ordering,
       },
       errors: {
         500: `Internal server error`,

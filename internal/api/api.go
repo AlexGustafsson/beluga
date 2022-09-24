@@ -79,8 +79,16 @@ func (a *API) GetSearch(w http.ResponseWriter, r *http.Request, params GetSearch
 	json.NewEncoder(w).Encode(result)
 }
 
-func (a *API) GetRepositories(w http.ResponseWriter, r *http.Request, namespace string) {
-	result := []Repository{
+func (a *API) GetRepositories(w http.ResponseWriter, r *http.Request, namespace string, params GetRepositoriesParams) {
+	page := Page{
+		Count:    1,
+		Next:     nil,
+		Page:     0,
+		Previous: nil,
+		PageSize: 25,
+	}
+
+	repositories := []Repository{
 		{
 			DateRegistered: time.Now(),
 			IsPrivate:      false,
@@ -111,6 +119,11 @@ func (a *API) GetRepositories(w http.ResponseWriter, r *http.Request, namespace 
 			StarCount:      10,
 			Status:         1,
 		},
+	}
+
+	result := RepositoryPage{
+		Page:    page,
+		Results: repositories,
 	}
 
 	w.Header().Set("Content-Type", "application/json")

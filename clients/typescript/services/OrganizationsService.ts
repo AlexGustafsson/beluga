@@ -2,7 +2,7 @@
 /* tslint:disable */
 /* eslint-disable */
 import type { Organization } from '../models/Organization';
-import type { Page } from '../models/Page';
+import type { OrganizationsPage } from '../models/OrganizationsPage';
 
 import type { CancelablePromise } from '../core/CancelablePromise';
 import type { BaseHttpRequest } from '../core/BaseHttpRequest';
@@ -15,19 +15,23 @@ export class OrganizationsService {
    * Fetch organizations
    * Fetch organizations
    * @param pageSize Page size
-   * @returns any Organizations
+   * @param page Page index
+   * @param ordering Sort order
+   * @returns OrganizationsPage Organizations
    * @throws ApiError
    */
   public getOrganizations(
     pageSize?: number,
-  ): CancelablePromise<(Page & {
-    results: Array<Organization>;
-  })> {
+    page?: number,
+    ordering: 'last_updated' | '-last_updated' | 'name' | '-name' = 'last_updated',
+  ): CancelablePromise<OrganizationsPage> {
     return this.httpRequest.request({
       method: 'GET',
       url: '/v2/orgs',
       query: {
         'page_size': pageSize,
+        'page': page,
+        'ordering': ordering,
       },
       errors: {
         500: `Internal server error`,
