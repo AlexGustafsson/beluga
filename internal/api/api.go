@@ -262,6 +262,50 @@ func (a *API) GetOrganization(w http.ResponseWriter, r *http.Request, organizati
 	json.NewEncoder(w).Encode(result)
 }
 
+func (a *API) GetOrganizations(w http.ResponseWriter, r *http.Request, params GetOrganizationsParams) {
+	page := Page{
+		Count:    100,
+		Next:     nil,
+		Page:     0,
+		PageSize: 25,
+		Previous: nil,
+	}
+
+	organization := Organization{
+		Badge:      "test",
+		Company:    "test",
+		DateJoined: time.Now(),
+		FullName:   "Bla Bla",
+		Id:         "",
+		IsActive:   true,
+		Location:   "Sweden",
+		Orgname:    "Org",
+		ProfileUrl: "http://example.com",
+		Type:       "org-type",
+	}
+
+	result := OrganizationsPage{
+		Page: page,
+		Results: []Organization{
+			organization,
+		},
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(result)
+}
+
+func (a *API) PostRepositories(w http.ResponseWriter, r *http.Request) {
+	var repository Repository
+	if err := json.NewDecoder(r.Body).Decode(&repository); err != nil {
+		http.Error(w, "bad request", http.StatusBadRequest)
+		return
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusCreated)
+	json.NewEncoder(w).Encode(repository)
+}
+
 func (a *API) GetUser(w http.ResponseWriter, r *http.Request, user string) {
 	result := User{
 		Company:    "test",

@@ -105,6 +105,19 @@ paths:
           application/json:
             schema:
               $ref: "#/components/schemas/CreateRepositoryRequest"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Repository"
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
   /v2/repositories/{namespace}:
     get:
       operationId: get-repositories
@@ -354,16 +367,7 @@ paths:
           content:
             application/json:
               schema:
-                allOf:
-                  - $ref: "#/components/schemas/Page"
-                  - type: object
-                    required:
-                      - results
-                    properties:
-                      results:
-                        type: array
-                        items:
-                          $ref: "#/components/schemas/Organization"
+                $ref: "#/components/schemas/OrganizationsPage"
         "500":
           description: Internal server error
           content:
@@ -791,6 +795,17 @@ components:
           type: string
         is_active:
           type: boolean
+    OrganizationsPage:
+      allOf:
+        - $ref: "#/components/schemas/Page"
+        - type: object
+          required:
+            - results
+          properties:
+            results:
+              type: array
+              items:
+                $ref: "#/components/schemas/Organization"
     User:
       type: object
       required:

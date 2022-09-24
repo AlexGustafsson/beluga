@@ -40,7 +40,9 @@ func main() {
 	api := api.New(dataStore, log)
 
 	mux := http.NewServeMux()
+	mux.Handle("/v2/repositories", api)
 	mux.Handle("/v2/repositories/", api)
+	mux.Handle("/v2/orgs", api)
 	mux.Handle("/v2/orgs/", api)
 	mux.Handle("/v2/users/", api)
 	mux.Handle("/api/", api)

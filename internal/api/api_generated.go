@@ -12,6 +12,12 @@ import (
 	"github.com/gorilla/mux"
 )
 
+// Defines values for CreateRepositoryRequestPrivacy.
+const (
+	CreateRepositoryRequestPrivacyPrivate CreateRepositoryRequestPrivacy = "private"
+	CreateRepositoryRequestPrivacyPublic  CreateRepositoryRequestPrivacy = "public"
+)
+
 // Defines values for RepositoryRepositoryType.
 const (
 	RepositoryRepositoryTypeImage RepositoryRepositoryType = "image"
@@ -29,6 +35,20 @@ const (
 	GetTagsParamsOrderingMinusName        GetTagsParamsOrdering = "-name"
 	GetTagsParamsOrderingName             GetTagsParamsOrdering = "name"
 )
+
+// CreateRepositoryRequest defines model for CreateRepositoryRequest.
+type CreateRepositoryRequest struct {
+	Description string                         `json:"description"`
+	Image       string                         `json:"image"`
+	IsPrivate   bool                           `json:"is_private"`
+	Name        string                         `json:"name"`
+	Namespace   string                         `json:"namespace"`
+	Privacy     CreateRepositoryRequestPrivacy `json:"privacy"`
+	Registry    string                         `json:"registry"`
+}
+
+// CreateRepositoryRequestPrivacy defines model for CreateRepositoryRequest.Privacy.
+type CreateRepositoryRequestPrivacy string
 
 // Error defines model for Error.
 type Error struct {
@@ -92,6 +112,14 @@ type Organization struct {
 	Orgname       string    `json:"orgname"`
 	ProfileUrl    string    `json:"profile_url"`
 	Type          string    `json:"type"`
+}
+
+// OrganizationsPage defines model for OrganizationsPage.
+type OrganizationsPage struct {
+	// Embedded struct due to allOf(#/components/schemas/Page)
+	Page `yaml:",inline"`
+	// Embedded fields due to inline allOf schema
+	Results []Organization `json:"results"`
 }
 
 // Page defines model for Page.
@@ -266,6 +294,12 @@ type GetSearchParams struct {
 	Sort *string `form:"sort,omitempty" json:"sort,omitempty"`
 }
 
+// GetOrganizationsParams defines parameters for GetOrganizations.
+type GetOrganizationsParams struct {
+	// PageSize Page size
+	PageSize *int `form:"page_size,omitempty" json:"page_size,omitempty"`
+}
+
 // GetTagsParams defines parameters for GetTags.
 type GetTagsParams struct {
 	// Ordering Sort order
@@ -278,14 +312,23 @@ type GetTagsParams struct {
 // GetTagsParamsOrdering defines parameters for GetTags.
 type GetTagsParamsOrdering string
 
+// PostRepositoriesJSONRequestBody defines body for PostRepositories for application/json ContentType.
+type PostRepositoriesJSONRequestBody = CreateRepositoryRequest
+
 // ServerInterface represents all server handlers.
 type ServerInterface interface {
 	// Perform a search
 	// (GET /api/content/v1/products/search)
 	GetSearch(w http.ResponseWriter, r *http.Request, params GetSearchParams)
+	// Fetch organizations
+	// (GET /v2/orgs)
+	GetOrganizations(w http.ResponseWriter, r *http.Request, params GetOrganizationsParams)
 	// Fetch organization
 	// (GET /v2/orgs/{organization})
 	GetOrganization(w http.ResponseWriter, r *http.Request, organization string)
+	// Create a repository
+	// (POST /v2/repositories)
+	PostRepositories(w http.ResponseWriter, r *http.Request)
 	// List repositories in a namespace
 	// (GET /v2/repositories/{namespace})
 	GetRepositories(w http.ResponseWriter, r *http.Request, namespace string)
@@ -402,6 +445,34 @@ func (siw *ServerInterfaceWrapper) GetSearch(w http.ResponseWriter, r *http.Requ
 	handler(w, r.WithContext(ctx))
 }
 
+// GetOrganizations operation middleware
+func (siw *ServerInterfaceWrapper) GetOrganizations(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	var err error
+
+	// Parameter object where we will unmarshal all parameters from the context
+	var params GetOrganizationsParams
+
+	// ------------- Optional query parameter "page_size" -------------
+
+	err = runtime.BindQueryParameter("form", true, false, "page_size", r.URL.Query(), &params.PageSize)
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "page_size", Err: err})
+		return
+	}
+
+	var handler = func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.GetOrganizations(w, r, params)
+	}
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler(w, r.WithContext(ctx))
+}
+
 // GetOrganization operation middleware
 func (siw *ServerInterfaceWrapper) GetOrganization(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
@@ -419,6 +490,21 @@ func (siw *ServerInterfaceWrapper) GetOrganization(w http.ResponseWriter, r *htt
 
 	var handler = func(w http.ResponseWriter, r *http.Request) {
 		siw.Handler.GetOrganization(w, r, organization)
+	}
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler(w, r.WithContext(ctx))
+}
+
+// PostRepositories operation middleware
+func (siw *ServerInterfaceWrapper) PostRepositories(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	var handler = func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.PostRepositories(w, r)
 	}
 
 	for _, middleware := range siw.HandlerMiddlewares {
@@ -807,7 +893,11 @@ func HandlerWithOptions(si ServerInterface, options GorillaServerOptions) http.H
 
 	r.HandleFunc(options.BaseURL+"/api/content/v1/products/search", wrapper.GetSearch).Methods("GET")
 
+	r.HandleFunc(options.BaseURL+"/v2/orgs", wrapper.GetOrganizations).Methods("GET")
+
 	r.HandleFunc(options.BaseURL+"/v2/orgs/{organization}", wrapper.GetOrganization).Methods("GET")
+
+	r.HandleFunc(options.BaseURL+"/v2/repositories", wrapper.PostRepositories).Methods("POST")
 
 	r.HandleFunc(options.BaseURL+"/v2/repositories/{namespace}", wrapper.GetRepositories).Methods("GET")
 
