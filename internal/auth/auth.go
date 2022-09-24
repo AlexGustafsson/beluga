@@ -131,6 +131,7 @@ func (a *Authorizer) Authorize(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// TODO: Refresh tokens not implemented
 	if responseMode == "query" {
 		redirectURIQuery := redirectURI.Query()
 		redirectURIQuery.Add("code", code)
