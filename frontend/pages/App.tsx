@@ -6,7 +6,10 @@ import HomePage from "./HomePage";
 import ImagePage from "./ImagePage";
 import OrganizationsPage from "./OrganizationsPage";
 import RepositoriesPage from "./RepositoriesPage";
-import RepositoryPage from "./RepositoryPage";
+import RepositoryPage, {
+  RepositoryOverviewPage,
+  RepositoryTagPage,
+} from "./RepositoryPage";
 import RepositorySettingsPage, {
   RepositoryGeneralSettingsPage,
   RepositorySettingsSettingsPage,
@@ -126,7 +129,10 @@ export default function (): JSX.Element {
         <Route
           path="/r/:namespace/:repositoryName"
           element={<RepositoryPage />}
-        />
+        >
+          <Route index element={<RepositoryOverviewPage />} />
+          <Route path="tags" element={<RepositoryTagPage />} />
+        </Route>
         <Route path="/_/:repositoryName" element={<RepositoryPage />} />
         <Route
           path="/layers/:namespace/:repositoryName/:tagName/images/:digest"

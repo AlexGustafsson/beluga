@@ -1,5 +1,6 @@
 import BreadcrumbSeparator from "../components/BreadcrumbSeparator";
 import "../styles/markdown.css";
+import { useSubPage } from "../utils";
 import { Schedule } from "@mui/icons-material";
 import { Breadcrumbs, Card, Divider, Stack, Tab, Tabs } from "@mui/material";
 import { NavLink, Outlet, useParams } from "react-router-dom";
@@ -45,17 +46,6 @@ export function RepositoryTagsSettingsPage() {
 
 export function RepositorySettingsSettingsPage() {
   return <p>Settings</p>;
-}
-
-function useSubPage(
-  available: string[],
-  defaultPage?: string
-): string | undefined {
-  const page = location.pathname.replace(/\/$/, "").split("/").pop()!;
-  if (available.includes(page)) {
-    return page;
-  }
-  return defaultPage;
 }
 
 export default function (): JSX.Element {

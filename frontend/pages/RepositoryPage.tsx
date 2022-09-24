@@ -4,6 +4,7 @@ import RepositoryBox from "../components/RepositoryBox";
 import TagCard from "../components/TagCard";
 import TextFieldCopy from "../components/TextFieldCopy";
 import "../styles/markdown.css";
+import { useSubPage } from "../utils";
 import { Clear, Search } from "@mui/icons-material";
 import {
   Breadcrumbs,
@@ -23,10 +24,10 @@ import {
 import { Box } from "@mui/system";
 import { useEffect, useState } from "react";
 import ReactMarkdown from "react-markdown";
-import { NavLink, useParams, useSearchParams } from "react-router-dom";
+import { NavLink, Outlet, useParams } from "react-router-dom";
 import remarkGfm from "remark-gfm";
 
-function DescriptionPage(): JSX.Element {
+export function RepositoryOverviewPage(): JSX.Element {
   const [repository, setRepository] = useState<RepositoryWithDetails>();
 
   const client = useClient();
@@ -83,13 +84,9 @@ function DescriptionPage(): JSX.Element {
   );
 }
 
-function TagsPage({
-  namespace,
-  repositoryName,
-}: {
-  namespace: string;
-  repositoryName: string;
-}): JSX.Element {
+export function RepositoryTagPage(): JSX.Element {
+  const { namespace, repositoryName = "_" } = useParams();
+
   const [pages, setPages] = useState<number>(0);
   const [page, setPage] = useState<number>(0);
   const [results, setResults] = useState<Tag[]>([]);
@@ -171,41 +168,10 @@ function TagsPage({
 }
 
 export default function (): JSX.Element {
-  const [searchParams, setSearchParams] = useSearchParams();
   const { namespace, repositoryName = "_" } = useParams();
-  const [tab, setTab] = useState<number>(0);
   const [repository, setRepository] = useState<RepositoryWithDetails>();
-  const tabs = ["overview", "tags"];
 
-  function tabChanged(
-    event: React.SyntheticEvent<Element, Event>,
-    value: number
-  ) {
-    if (value === 0) {
-      setSearchParams({});
-    } else {
-      setSearchParams({ tab: tabs[value].toLowerCase() });
-    }
-    setTab(value);
-  }
-
-  useEffect(() => {
-    const tab = searchParams.get("tab");
-    if (tab) {
-      const index = tabs.indexOf(tab);
-      if (index >= 0) {
-        setTab(index);
-      } else {
-        // Clear bad tabs
-        setSearchParams({});
-      }
-    }
-  }, []);
-
-  const pages = [
-    <DescriptionPage />,
-    <TagsPage namespace={namespace!} repositoryName={repositoryName} />,
-  ];
+  const tab = useSubPage(["overview", "tags"], "");
 
   const client = useClient();
   useEffect(() => {
@@ -244,19 +210,26 @@ export default function (): JSX.Element {
           paddingRight: "24px",
         }}
       >
-        <Tabs value={tab} onChange={tabChanged}>
-          {tabs.map((x) => (
-            <Tab
-              key={x}
-              label={x}
-              sx={{ padding: "20px", textTransform: "capitalize" }}
-            />
-          ))}
+        <Tabs value={tab}>
+          <Tab
+            component={NavLink}
+            to=""
+            value=""
+            label="Overview"
+            sx={{ padding: "20px", textTransform: "capitalize" }}
+          />
+          <Tab
+            component={NavLink}
+            to="tags"
+            value="tags"
+            label="Tags"
+            sx={{ padding: "20px", textTransform: "capitalize" }}
+          />
         </Tabs>
       </Box>
       <Divider />
       <Box sx={{ padding: "12px", backgroundColor: "#f7f7f8", flexGrow: 1 }}>
-        {pages[tab]}
+        <Outlet />
       </Box>
     </div>
   );
