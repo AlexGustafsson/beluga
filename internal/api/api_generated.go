@@ -52,6 +52,22 @@ const (
 	GetTagsParamsOrderingName             GetTagsParamsOrdering = "name"
 )
 
+// Defines values for GetUserContributedParamsOrdering.
+const (
+	GetUserContributedParamsOrderingLastUpdated      GetUserContributedParamsOrdering = "last_updated"
+	GetUserContributedParamsOrderingMinusLastUpdated GetUserContributedParamsOrdering = "-last_updated"
+	GetUserContributedParamsOrderingMinusName        GetUserContributedParamsOrdering = "-name"
+	GetUserContributedParamsOrderingName             GetUserContributedParamsOrdering = "name"
+)
+
+// Defines values for GetUserStarredParamsOrdering.
+const (
+	GetUserStarredParamsOrderingLastUpdated      GetUserStarredParamsOrdering = "last_updated"
+	GetUserStarredParamsOrderingMinusLastUpdated GetUserStarredParamsOrdering = "-last_updated"
+	GetUserStarredParamsOrderingMinusName        GetUserStarredParamsOrdering = "-name"
+	GetUserStarredParamsOrderingName             GetUserStarredParamsOrdering = "name"
+)
+
 // CreateRepositoryRequest defines model for CreateRepositoryRequest.
 type CreateRepositoryRequest struct {
 	Description string                         `json:"description"`
@@ -352,6 +368,36 @@ type GetTagsParams struct {
 // GetTagsParamsOrdering defines parameters for GetTags.
 type GetTagsParamsOrdering string
 
+// GetUserContributedParams defines parameters for GetUserContributed.
+type GetUserContributedParams struct {
+	// PageSize Page size
+	PageSize *int `form:"page_size,omitempty" json:"page_size,omitempty"`
+
+	// Page Page index
+	Page *int `form:"page,omitempty" json:"page,omitempty"`
+
+	// Ordering Sort order
+	Ordering *GetUserContributedParamsOrdering `form:"ordering,omitempty" json:"ordering,omitempty"`
+}
+
+// GetUserContributedParamsOrdering defines parameters for GetUserContributed.
+type GetUserContributedParamsOrdering string
+
+// GetUserStarredParams defines parameters for GetUserStarred.
+type GetUserStarredParams struct {
+	// PageSize Page size
+	PageSize *int `form:"page_size,omitempty" json:"page_size,omitempty"`
+
+	// Page Page index
+	Page *int `form:"page,omitempty" json:"page,omitempty"`
+
+	// Ordering Sort order
+	Ordering *GetUserStarredParamsOrdering `form:"ordering,omitempty" json:"ordering,omitempty"`
+}
+
+// GetUserStarredParamsOrdering defines parameters for GetUserStarred.
+type GetUserStarredParamsOrdering string
+
 // PostRepositoriesJSONRequestBody defines body for PostRepositories for application/json ContentType.
 type PostRepositoriesJSONRequestBody = CreateRepositoryRequest
 
@@ -390,6 +436,12 @@ type ServerInterface interface {
 	// Fetch user
 	// (GET /v2/users/{user})
 	GetUser(w http.ResponseWriter, r *http.Request, user string)
+	// Fetch user contributed repositories
+	// (GET /v2/users/{user}/repositories/contributed)
+	GetUserContributed(w http.ResponseWriter, r *http.Request, user string, params GetUserContributedParams)
+	// Fetch user starred repositories
+	// (GET /v2/users/{user}/repositories/starred)
+	GetUserStarred(w http.ResponseWriter, r *http.Request, user string, params GetUserStarredParams)
 }
 
 // ServerInterfaceWrapper converts contexts to parameters.
@@ -861,6 +913,112 @@ func (siw *ServerInterfaceWrapper) GetUser(w http.ResponseWriter, r *http.Reques
 	handler(w, r.WithContext(ctx))
 }
 
+// GetUserContributed operation middleware
+func (siw *ServerInterfaceWrapper) GetUserContributed(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	var err error
+
+	// ------------- Path parameter "user" -------------
+	var user string
+
+	err = runtime.BindStyledParameter("simple", false, "user", mux.Vars(r)["user"], &user)
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "user", Err: err})
+		return
+	}
+
+	// Parameter object where we will unmarshal all parameters from the context
+	var params GetUserContributedParams
+
+	// ------------- Optional query parameter "page_size" -------------
+
+	err = runtime.BindQueryParameter("form", true, false, "page_size", r.URL.Query(), &params.PageSize)
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "page_size", Err: err})
+		return
+	}
+
+	// ------------- Optional query parameter "page" -------------
+
+	err = runtime.BindQueryParameter("form", true, false, "page", r.URL.Query(), &params.Page)
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "page", Err: err})
+		return
+	}
+
+	// ------------- Optional query parameter "ordering" -------------
+
+	err = runtime.BindQueryParameter("form", true, false, "ordering", r.URL.Query(), &params.Ordering)
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "ordering", Err: err})
+		return
+	}
+
+	var handler = func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.GetUserContributed(w, r, user, params)
+	}
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler(w, r.WithContext(ctx))
+}
+
+// GetUserStarred operation middleware
+func (siw *ServerInterfaceWrapper) GetUserStarred(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	var err error
+
+	// ------------- Path parameter "user" -------------
+	var user string
+
+	err = runtime.BindStyledParameter("simple", false, "user", mux.Vars(r)["user"], &user)
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "user", Err: err})
+		return
+	}
+
+	// Parameter object where we will unmarshal all parameters from the context
+	var params GetUserStarredParams
+
+	// ------------- Optional query parameter "page_size" -------------
+
+	err = runtime.BindQueryParameter("form", true, false, "page_size", r.URL.Query(), &params.PageSize)
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "page_size", Err: err})
+		return
+	}
+
+	// ------------- Optional query parameter "page" -------------
+
+	err = runtime.BindQueryParameter("form", true, false, "page", r.URL.Query(), &params.Page)
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "page", Err: err})
+		return
+	}
+
+	// ------------- Optional query parameter "ordering" -------------
+
+	err = runtime.BindQueryParameter("form", true, false, "ordering", r.URL.Query(), &params.Ordering)
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "ordering", Err: err})
+		return
+	}
+
+	var handler = func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.GetUserStarred(w, r, user, params)
+	}
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler(w, r.WithContext(ctx))
+}
+
 type UnescapedCookieParamError struct {
 	ParamName string
 	Err       error
@@ -995,6 +1153,10 @@ func HandlerWithOptions(si ServerInterface, options GorillaServerOptions) http.H
 	r.HandleFunc(options.BaseURL+"/v2/repositories/{namespace}/{repository}/tags/{tag}/images", wrapper.GetImages).Methods("GET")
 
 	r.HandleFunc(options.BaseURL+"/v2/users/{user}", wrapper.GetUser).Methods("GET")
+
+	r.HandleFunc(options.BaseURL+"/v2/users/{user}/repositories/contributed", wrapper.GetUserContributed).Methods("GET")
+
+	r.HandleFunc(options.BaseURL+"/v2/users/{user}/repositories/starred", wrapper.GetUserStarred).Methods("GET")
 
 	return r
 }

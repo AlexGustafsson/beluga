@@ -171,7 +171,7 @@ export default function (): JSX.Element {
   const { namespace, repositoryName = "_" } = useParams();
   const [repository, setRepository] = useState<RepositoryWithDetails>();
 
-  const tab = useSubPage(["overview", "tags"], "");
+  const tab = useSubPage(["", "tags"], "");
 
   const client = useClient();
   useEffect(() => {

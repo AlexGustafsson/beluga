@@ -21,6 +21,7 @@ replace github.com/distribution/distribution/v3 v3.0.0-20220822034424-3413bf8e14
 
 require (
 	github.com/AndreasBriese/bbloom v0.0.0-20190825152654-46b345b51c96 // indirect
+	github.com/Azure/go-ntlmssp v0.0.0-20220621081337-cb9428e4ac1e // indirect
 	github.com/Shopify/logrus-bugsnag v0.0.0-20171204204709-577dee27f20d // indirect
 	github.com/apapsch/go-jsonmerge/v2 v2.0.0 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
@@ -34,6 +35,8 @@ require (
 	github.com/docker/libtrust v0.0.0-20150114040149-fa567046d9b1 // indirect
 	github.com/dustin/go-humanize v1.0.0 // indirect
 	github.com/felixge/httpsnoop v1.0.1 // indirect
+	github.com/go-asn1-ber/asn1-ber v1.5.4 // indirect
+	github.com/go-ldap/ldap/v3 v3.4.4 // indirect
 	github.com/golang/protobuf v1.5.2 // indirect
 	github.com/gomodule/redigo v1.8.2 // indirect
 	github.com/google/go-cmp v0.5.8 // indirect
@@ -53,7 +56,7 @@ require (
 	github.com/yvasiyarov/newrelic_platform_go v0.0.0-20140908184405-b21fdbd4370f // indirect
 	go.uber.org/atomic v1.7.0 // indirect
 	go.uber.org/multierr v1.6.0 // indirect
-	golang.org/x/crypto v0.0.0-20220513210258-46612604a0f9 // indirect
+	golang.org/x/crypto v0.0.0-20220622213112-05595931fe9d // indirect
 	golang.org/x/net v0.0.0-20220909164309-bea034e7d591 // indirect
 	golang.org/x/sys v0.0.0-20220728004956-3c1f35247d10 // indirect
 	golang.org/x/text v0.3.7 // indirect

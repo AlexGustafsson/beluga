@@ -462,6 +462,98 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Error"
+  /v2/users/{user}/repositories/starred:
+    get:
+      operationId: get-user-starred
+      summary: Fetch user starred repositories
+      description: Fetch user starred repositories
+      tags:
+        - Users
+      parameters:
+        - in: path
+          name: user
+          required: true
+          schema:
+            type: string
+        - in: query
+          name: page_size
+          description: Page size
+          required: false
+          schema:
+            type: integer
+        - in: query
+          name: page
+          description: Page index
+          required: false
+          schema:
+            type: integer
+        - in: query
+          name: ordering
+          description: Sort order
+          required: false
+          schema:
+            type: string
+            default: "last_updated"
+            enum: ["last_updated", "-last_updated", "name", "-name"]
+      responses:
+        "200":
+          description: Repositories
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RepositoryPage"
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /v2/users/{user}/repositories/contributed:
+    get:
+      operationId: get-user-contributed
+      summary: Fetch user contributed repositories
+      description: Fetch user contributed repositories
+      tags:
+        - Users
+      parameters:
+        - in: path
+          name: user
+          required: true
+          schema:
+            type: string
+        - in: query
+          name: page_size
+          description: Page size
+          required: false
+          schema:
+            type: integer
+        - in: query
+          name: page
+          description: Page index
+          required: false
+          schema:
+            type: integer
+        - in: query
+          name: ordering
+          description: Sort order
+          required: false
+          schema:
+            type: string
+            default: "last_updated"
+            enum: ["last_updated", "-last_updated", "name", "-name"]
+      responses:
+        "200":
+          description: Repositories
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RepositoryPage"
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
 
 components:
   schemas:

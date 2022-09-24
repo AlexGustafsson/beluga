@@ -16,7 +16,11 @@ import RepositorySettingsPage, {
   RepositoryTagsSettingsPage,
 } from "./RepositorySettingsPage";
 import SettingsPage from "./SettingsPage";
-import UserProfilePage from "./UserProfilePage";
+import UserProfilePage, {
+  UserProfileContributedPage,
+  UserProfileRepositoriesPage,
+  UserProfileStarredPage,
+} from "./UserProfilePage";
 import { useAuth0 } from "@auth0/auth0-react";
 import { KeyboardArrowDown } from "@mui/icons-material";
 import { Button, Divider, Menu, MenuItem } from "@mui/material";
@@ -139,7 +143,11 @@ export default function (): JSX.Element {
           element={<ImagePage />}
         />
         <Route path="/settings/:page" element={<SettingsPage />} />
-        <Route path="/u/:username" element={<UserProfilePage />} />
+        <Route path="/u/:username" element={<UserProfilePage />}>
+          <Route index element={<UserProfileRepositoriesPage />} />
+          <Route path="starred" element={<UserProfileStarredPage />} />
+          <Route path="contributed" element={<UserProfileContributedPage />} />
+        </Route>
         <Route path="/repositories" element={<RepositoriesPage />} />
         <Route path="/orgs" element={<OrganizationsPage />} />
         <Route path="/repository/create" element={<CreateRepositoryPage />} />

@@ -1,17 +1,117 @@
+import { Repository, useClient, User } from "../client";
 import "../styles/markdown.css";
-import { useAuth0 } from "@auth0/auth0-react";
-import { Divider, Tab, Tabs } from "@mui/material";
+import { useSubPage } from "../utils";
+import { AccessTime, DataUsage, Person } from "@mui/icons-material";
+import { Divider, Stack, SvgIcon, Tab, Tabs } from "@mui/material";
 import { Box } from "@mui/system";
+import { useEffect, useState } from "react";
+import { NavLink, Outlet, useParams } from "react-router-dom";
+
+export function UserProfileRepositoriesPage(): JSX.Element {
+  const { username } = useParams();
+  const [repositories, setRepositories] = useState<Repository[]>([]);
+
+  const client = useClient();
+  useEffect(() => {
+    // TODO: Pagination
+    client.repositories.getRepositories(username!).then((x) => {
+      setRepositories(x.results);
+    });
+  }, []);
+
+  // TODO: Use a card. There are too many box, card variations, hard to maintain
+  return (
+    <>
+      {repositories.map((repository) => (
+        <p>{repository.name}</p>
+      ))}
+    </>
+  );
+}
+
+export function UserProfileStarredPage(): JSX.Element {
+  const { username } = useParams();
+  const [repositories, setRepositories] = useState<Repository[]>([]);
+
+  const client = useClient();
+  useEffect(() => {
+    // TODO: Pagination
+    client.users.getUserStarred(username!).then((x) => {
+      setRepositories(x.results);
+    });
+  }, []);
+
+  // TODO: Use a card. There are too many box, card variations, hard to maintain
+  return (
+    <>
+      {repositories.map((repository) => (
+        <p>{repository.name}</p>
+      ))}
+    </>
+  );
+}
+
+export function UserProfileContributedPage(): JSX.Element {
+  const { username } = useParams();
+  const [repositories, setRepositories] = useState<Repository[]>([]);
+
+  const client = useClient();
+  useEffect(() => {
+    // TODO: Pagination
+    client.users.getUserContributed(username!).then((x) => {
+      setRepositories(x.results);
+    });
+  }, []);
+
+  // TODO: Use a card. There are too many box, card variations, hard to maintain
+  return (
+    <>
+      {repositories.map((repository) => (
+        <p>{repository.name}</p>
+      ))}
+    </>
+  );
+}
 
 export default function (): JSX.Element {
-  const { user } = useAuth0();
-  const tabs = ["repositories", "starred", "contributed"];
-  const tab = "repositories";
+  const { username } = useParams();
+  const tab = useSubPage(["", "starred", "contributed"], "");
+
+  const [user, setUser] = useState<User>();
+
+  const client = useClient();
+  useEffect(() => {
+    client.users.getUser(username!).then((x) => {
+      setUser(x);
+    });
+  }, []);
 
   return (
     <div className="flex flex-col grow">
       <header className="flex space-x-4">
-        <p>{user?.preferred_username}</p>
+        <Stack direction="row" className="p-4 items-center">
+          <SvgIcon
+            component={DataUsage}
+            inheritViewBox
+            sx={{ width: "120px", height: "120px" }}
+          />
+          <Stack className="ml-8" sx={{ color: "#445d6e" }}>
+            <h2 className="text-xl font-semibold">{username}</h2>
+            <Stack
+              direction="row"
+              className="text-xs items-center mt-3"
+              sx={{ color: "#8f9ea8", fill: "#8f9ea8" }}
+            >
+              <Person sx={{ width: "18px", height: "18px" }} />
+              <p className="ml-1">Community User</p>
+              <AccessTime
+                className="ml-4"
+                sx={{ width: "18px", height: "18px" }}
+              />
+              <p className="ml-1">{user?.date_joined}</p>
+            </Stack>
+          </Stack>
+        </Stack>
       </header>
       <Box
         sx={{
@@ -19,20 +119,34 @@ export default function (): JSX.Element {
           paddingRight: "24px",
         }}
       >
-        <Tabs value={0}>
-          {tabs.map((x) => (
-            <Tab
-              key={x}
-              label={x}
-              sx={{ padding: "20px", textTransform: "capitalize" }}
-            />
-          ))}
+        <Tabs value={tab}>
+          <Tab
+            component={NavLink}
+            to=""
+            value=""
+            label="Repositories"
+            sx={{ padding: "20px", textTransform: "capitalize" }}
+          />
+          <Tab
+            component={NavLink}
+            to="starred"
+            value="starred"
+            label="Starred"
+            sx={{ padding: "20px", textTransform: "capitalize" }}
+          />
+          <Tab
+            component={NavLink}
+            to="contributed"
+            value="contributed"
+            label="Contributed"
+            sx={{ padding: "20px", textTransform: "capitalize" }}
+          />
         </Tabs>
       </Box>
       <Divider />
-      <Box
-        sx={{ padding: "12px", backgroundColor: "#f7f7f8", flexGrow: 1 }}
-      ></Box>
+      <Box sx={{ padding: "12px", backgroundColor: "#f7f7f8", flexGrow: 1 }}>
+        <Outlet />
+      </Box>
     </div>
   );
 }

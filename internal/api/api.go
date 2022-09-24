@@ -332,3 +332,105 @@ func (a *API) GetUser(w http.ResponseWriter, r *http.Request, user string) {
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(result)
 }
+
+func (a *API) GetUserStarred(w http.ResponseWriter, r *http.Request, user string, params GetUserStarredParams) {
+	page := Page{
+		Count:    1,
+		Next:     nil,
+		Page:     0,
+		Previous: nil,
+		PageSize: 25,
+	}
+
+	repositories := []Repository{
+		{
+			DateRegistered: time.Now(),
+			IsPrivate:      false,
+			LastUpdated:    time.Now(),
+			Name:           "Foo",
+			Namespace:      "Bar",
+			PullCount:      100,
+			StarCount:      10,
+			Status:         1,
+		},
+		{
+			DateRegistered: time.Now(),
+			IsPrivate:      false,
+			LastUpdated:    time.Now(),
+			Name:           "Test",
+			Namespace:      "Test",
+			PullCount:      100,
+			StarCount:      10,
+			Status:         1,
+		},
+		{
+			DateRegistered: time.Now(),
+			IsPrivate:      false,
+			LastUpdated:    time.Now(),
+			Name:           "Bar",
+			Namespace:      "Baz",
+			PullCount:      100,
+			StarCount:      10,
+			Status:         1,
+		},
+	}
+
+	result := RepositoryPage{
+		Page:    page,
+		Results: repositories,
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(result)
+}
+
+func (a *API) GetUserContributed(w http.ResponseWriter, r *http.Request, user string, params GetUserContributedParams) {
+	page := Page{
+		Count:    1,
+		Next:     nil,
+		Page:     0,
+		Previous: nil,
+		PageSize: 25,
+	}
+
+	repositories := []Repository{
+		{
+			DateRegistered: time.Now(),
+			IsPrivate:      false,
+			LastUpdated:    time.Now(),
+			Name:           "Foo",
+			Namespace:      "Bar",
+			PullCount:      100,
+			StarCount:      10,
+			Status:         1,
+		},
+		{
+			DateRegistered: time.Now(),
+			IsPrivate:      false,
+			LastUpdated:    time.Now(),
+			Name:           "Test",
+			Namespace:      "Test",
+			PullCount:      100,
+			StarCount:      10,
+			Status:         1,
+		},
+		{
+			DateRegistered: time.Now(),
+			IsPrivate:      false,
+			LastUpdated:    time.Now(),
+			Name:           "Bar",
+			Namespace:      "Baz",
+			PullCount:      100,
+			StarCount:      10,
+			Status:         1,
+		},
+	}
+
+	result := RepositoryPage{
+		Page:    page,
+		Results: repositories,
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(result)
+}
