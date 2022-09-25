@@ -356,10 +356,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  contents:
-                    type: string
+                $ref: "#/components/schemas/Dockerfile"
         "500":
           description: Internal server error
           content:
@@ -1065,11 +1062,15 @@ components:
       type: object
       required:
         - message
+        - status
         - errinfo
       properties:
         errinfo:
           type: object
           additionalProperties: true
+        status:
+          type: number
+          x-go-type: int
         message:
           type: string
     Layer:
@@ -1222,3 +1223,8 @@ components:
               type: array
               items:
                 $ref: "#/components/schemas/Token"
+    Dockerfile:
+      type: object
+      properties:
+        contents:
+          type: string

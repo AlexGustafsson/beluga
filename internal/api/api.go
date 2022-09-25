@@ -2,7 +2,6 @@ package api
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"time"
 
@@ -44,7 +43,7 @@ func (a *API) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	a.handler.ServeHTTP(w, r)
 }
 
-func (a *API) GetSearch(w http.ResponseWriter, r *http.Request, params GetSearchParams) {
+func (a *API) GetSearch(w http.ResponseWriter, r *http.Request, params GetSearchParams) (*SummaryPage, *Error) {
 	page := Page{
 		Count:    100,
 		Next:     nil,
@@ -53,7 +52,7 @@ func (a *API) GetSearch(w http.ResponseWriter, r *http.Request, params GetSearch
 		Previous: nil,
 	}
 
-	result := SummaryPage{
+	result := &SummaryPage{
 		Page: page,
 		Summaries: []Summary{
 			{
@@ -77,11 +76,10 @@ func (a *API) GetSearch(w http.ResponseWriter, r *http.Request, params GetSearch
 		},
 	}
 
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(result)
+	return result, nil
 }
 
-func (a *API) GetRepositories(w http.ResponseWriter, r *http.Request, namespace string, params GetRepositoriesParams) {
+func (a *API) GetRepositories(w http.ResponseWriter, r *http.Request, namespace string, params GetRepositoriesParams) (*RepositoryPage, *Error) {
 	page := Page{
 		Count:    1,
 		Next:     nil,
@@ -123,17 +121,16 @@ func (a *API) GetRepositories(w http.ResponseWriter, r *http.Request, namespace 
 		},
 	}
 
-	result := RepositoryPage{
+	result := &RepositoryPage{
 		Page:    page,
 		Results: repositories,
 	}
 
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(result)
+	return result, nil
 }
 
-func (a *API) GetRepository(w http.ResponseWriter, r *http.Request, namespace string, repository string) {
-	result := RepositoryWithDetails{
+func (a *API) GetRepository(w http.ResponseWriter, r *http.Request, namespace string, repository string) (*RepositoryWithDetails, *Error) {
+	result := &RepositoryWithDetails{
 		Repository: Repository{
 			DateRegistered: time.Now(),
 			IsPrivate:      false,
@@ -148,15 +145,17 @@ func (a *API) GetRepository(w http.ResponseWriter, r *http.Request, namespace st
 		FullDescription: "# Hello!",
 		HubUser:         "foo",
 	}
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(result)
+	return result, nil
 }
 
-func (a *API) GetDockerfile(w http.ResponseWriter, r *http.Request, namespace string, repository string) {
-
+func (a *API) GetDockerfile(w http.ResponseWriter, r *http.Request, namespace string, repository string) (*Dockerfile, *Error) {
+	return nil, &Error{
+		Message: "not implemented",
+		Status:  http.StatusNotImplemented,
+	}
 }
 
-func (a *API) GetTags(w http.ResponseWriter, r *http.Request, namespace string, repository string, params GetTagsParams) {
+func (a *API) GetTags(w http.ResponseWriter, r *http.Request, namespace string, repository string, params GetTagsParams) (*TagPage, *Error) {
 	page := Page{
 		Count:    1,
 		Next:     nil,
@@ -189,18 +188,17 @@ func (a *API) GetTags(w http.ResponseWriter, r *http.Request, namespace string, 
 		V2:                  true,
 	}
 
-	result := TagPage{
+	result := &TagPage{
 		Page: page,
 		Results: []Tag{
 			tag,
 		},
 	}
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(result)
+	return result, nil
 }
 
-func (a *API) GetTag(w http.ResponseWriter, r *http.Request, namespace string, repository string, tag string) {
-	result := Tag{
+func (a *API) GetTag(w http.ResponseWriter, r *http.Request, namespace string, repository string, tag string) (*Tag, *Error) {
+	result := &Tag{
 		Creator:  0,
 		Digest:   "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
 		FullSize: 10000,
@@ -223,11 +221,10 @@ func (a *API) GetTag(w http.ResponseWriter, r *http.Request, namespace string, r
 		TagLastPushed:       time.Now(),
 		V2:                  true,
 	}
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(result)
+	return result, nil
 }
 
-func (a *API) GetImages(w http.ResponseWriter, r *http.Request, namespace string, repository string, tag string) {
+func (a *API) GetImages(w http.ResponseWriter, r *http.Request, namespace string, repository string, tag string) ([]ImageWithDetails, *Error) {
 	image := Image{
 		Architecture: "amd64",
 		Digest:       "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
@@ -256,12 +253,11 @@ func (a *API) GetImages(w http.ResponseWriter, r *http.Request, namespace string
 			},
 		},
 	}
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(result)
+	return result, nil
 }
 
-func (a *API) GetOrganization(w http.ResponseWriter, r *http.Request, organization string) {
-	result := Organization{
+func (a *API) GetOrganization(w http.ResponseWriter, r *http.Request, organization string) (*Organization, *Error) {
+	result := &Organization{
 		Badge:      "test",
 		Company:    "test",
 		DateJoined: time.Now(),
@@ -273,11 +269,10 @@ func (a *API) GetOrganization(w http.ResponseWriter, r *http.Request, organizati
 		ProfileUrl: "http://example.com",
 		Type:       "org-type",
 	}
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(result)
+	return result, nil
 }
 
-func (a *API) GetOrganizations(w http.ResponseWriter, r *http.Request, params GetOrganizationsParams) {
+func (a *API) GetOrganizations(w http.ResponseWriter, r *http.Request, params GetOrganizationsParams) (*OrganizationsPage, *Error) {
 	page := Page{
 		Count:    100,
 		Next:     nil,
@@ -299,30 +294,32 @@ func (a *API) GetOrganizations(w http.ResponseWriter, r *http.Request, params Ge
 		Type:       "org-type",
 	}
 
-	result := OrganizationsPage{
+	result := &OrganizationsPage{
 		Page: page,
 		Results: []Organization{
 			organization,
 		},
 	}
 
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(result)
+	return result, nil
 }
 
-func (a *API) PostRepositories(w http.ResponseWriter, r *http.Request) {
+func (a *API) PostRepositories(w http.ResponseWriter, r *http.Request) (*Repository, *Error) {
 	var repository Repository
 	if err := json.NewDecoder(r.Body).Decode(&repository); err != nil {
-		httpError(w, fmt.Errorf("bad request"), http.StatusBadRequest)
-		return
+		return nil, &Error{
+			Message: err.Error(),
+			Status:  http.StatusBadRequest,
+		}
 	}
-	w.Header().Set("Content-Type", "application/json")
+	// TODO: won't include content type from result, right?
+	// One solution is to wrap http.ResponseWriter and pick the status from WriteHeader without writing it
 	w.WriteHeader(http.StatusCreated)
-	json.NewEncoder(w).Encode(repository)
+	return &repository, nil
 }
 
-func (a *API) GetCurrentUser(w http.ResponseWriter, r *http.Request) {
-	result := User{
+func (a *API) GetCurrentUser(w http.ResponseWriter, r *http.Request) (*User, *Error) {
+	result := &User{
 		Company:    "test",
 		DateJoined: time.Now(),
 		FullName:   "Bla Bla",
@@ -332,18 +329,19 @@ func (a *API) GetCurrentUser(w http.ResponseWriter, r *http.Request) {
 		Type:       "org-type",
 		Username:   "test-user",
 	}
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(result)
+	return result, nil
 }
 
-func (a *API) UpdateCurrentUser(w http.ResponseWriter, r *http.Request) {
+func (a *API) UpdateCurrentUser(w http.ResponseWriter, r *http.Request) (*User, *Error) {
 	var update UserUpdate
 	if err := json.NewDecoder(r.Body).Decode(&update); err != nil {
-		httpError(w, fmt.Errorf("bad request"), http.StatusBadRequest)
-		return
+		return nil, &Error{
+			Message: err.Error(),
+			Status:  http.StatusBadRequest,
+		}
 	}
 
-	result := User{
+	result := &User{
 		Company:    "test",
 		DateJoined: time.Now(),
 		FullName:   "Bla Bla",
@@ -353,12 +351,11 @@ func (a *API) UpdateCurrentUser(w http.ResponseWriter, r *http.Request) {
 		Type:       "org-type",
 		Username:   "test-user",
 	}
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(result)
+	return result, nil
 }
 
-func (a *API) GetUser(w http.ResponseWriter, r *http.Request, user string) {
-	result := User{
+func (a *API) GetUser(w http.ResponseWriter, r *http.Request, user string) (*User, *Error) {
+	result := &User{
 		Company:    "test",
 		DateJoined: time.Now(),
 		FullName:   "Bla Bla",
@@ -368,11 +365,10 @@ func (a *API) GetUser(w http.ResponseWriter, r *http.Request, user string) {
 		Type:       "org-type",
 		Username:   "test-user",
 	}
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(result)
+	return result, nil
 }
 
-func (a *API) GetUserStarred(w http.ResponseWriter, r *http.Request, user string, params GetUserStarredParams) {
+func (a *API) GetUserStarred(w http.ResponseWriter, r *http.Request, user string, params GetUserStarredParams) (*RepositoryPage, *Error) {
 	page := Page{
 		Count:    1,
 		Next:     nil,
@@ -414,16 +410,15 @@ func (a *API) GetUserStarred(w http.ResponseWriter, r *http.Request, user string
 		},
 	}
 
-	result := RepositoryPage{
+	result := &RepositoryPage{
 		Page:    page,
 		Results: repositories,
 	}
 
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(result)
+	return result, nil
 }
 
-func (a *API) GetUserContributed(w http.ResponseWriter, r *http.Request, user string, params GetUserContributedParams) {
+func (a *API) GetUserContributed(w http.ResponseWriter, r *http.Request, user string, params GetUserContributedParams) (*RepositoryPage, *Error) {
 	page := Page{
 		Count:    1,
 		Next:     nil,
@@ -465,28 +460,26 @@ func (a *API) GetUserContributed(w http.ResponseWriter, r *http.Request, user st
 		},
 	}
 
-	result := RepositoryPage{
+	result := &RepositoryPage{
 		Page:    page,
 		Results: repositories,
 	}
 
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(result)
+	return result, nil
 }
 
-func (a *API) CreateAccessToken(w http.ResponseWriter, r *http.Request) {
+func (a *API) CreateAccessToken(w http.ResponseWriter, r *http.Request) (*Token, *Error) {
 	token := "blga_pat_0hlJIJwMtum2YF16nNc6zxfHmwx3wzSo9j0iVkI8uRk"
-	result := Token{
+	result := &Token{
 		TokenLabel: "test-token",
 		Token:      &token,
 		Scopes:     []string{"repo:admin"},
 	}
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(result)
+	return result, nil
 }
 
-func (a *API) GetAccessTokens(w http.ResponseWriter, r *http.Request) {
-	result := TokenPage{
+func (a *API) GetAccessTokens(w http.ResponseWriter, r *http.Request) (*TokenPage, *Error) {
+	result := &TokenPage{
 		Page:        Page{},
 		ActiveCount: 1,
 		Results: []Token{
@@ -497,6 +490,5 @@ func (a *API) GetAccessTokens(w http.ResponseWriter, r *http.Request) {
 			},
 		},
 	}
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(result)
+	return result, nil
 }

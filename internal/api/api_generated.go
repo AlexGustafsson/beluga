@@ -4,6 +4,7 @@
 package api
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"time"
@@ -82,10 +83,16 @@ type CreateRepositoryRequest struct {
 // CreateRepositoryRequestPrivacy defines model for CreateRepositoryRequest.Privacy.
 type CreateRepositoryRequestPrivacy string
 
+// Dockerfile defines model for Dockerfile.
+type Dockerfile struct {
+	Contents *string `json:"contents,omitempty"`
+}
+
 // Error defines model for Error.
 type Error struct {
 	Errinfo map[string]interface{} `json:"errinfo"`
 	Message string                 `json:"message"`
+	Status  int                    `json:"status"`
 }
 
 // Image defines model for Image.
@@ -450,55 +457,55 @@ type UpdateCurrentUserJSONRequestBody = UserUpdate
 type ServerInterface interface {
 	// Perform a search
 	// (GET /api/content/v1/products/search)
-	GetSearch(w http.ResponseWriter, r *http.Request, params GetSearchParams)
+	GetSearch(w http.ResponseWriter, r *http.Request, params GetSearchParams) (*SummaryPage, *Error)
 	// Get access tokens
 	// (GET /v2/access-tokens)
-	GetAccessTokens(w http.ResponseWriter, r *http.Request)
+	GetAccessTokens(w http.ResponseWriter, r *http.Request) (*TokenPage, *Error)
 	// Create an access token
 	// (POST /v2/access-tokens)
-	CreateAccessToken(w http.ResponseWriter, r *http.Request)
+	CreateAccessToken(w http.ResponseWriter, r *http.Request) (*Token, *Error)
 	// Fetch organizations
 	// (GET /v2/orgs)
-	GetOrganizations(w http.ResponseWriter, r *http.Request, params GetOrganizationsParams)
+	GetOrganizations(w http.ResponseWriter, r *http.Request, params GetOrganizationsParams) (*OrganizationsPage, *Error)
 	// Fetch organization
 	// (GET /v2/orgs/{organization})
-	GetOrganization(w http.ResponseWriter, r *http.Request, organization string)
+	GetOrganization(w http.ResponseWriter, r *http.Request, organization string) (*Organization, *Error)
 	// Create a repository
 	// (POST /v2/repositories)
-	PostRepositories(w http.ResponseWriter, r *http.Request)
+	PostRepositories(w http.ResponseWriter, r *http.Request) (*Repository, *Error)
 	// List repositories in a namespace
 	// (GET /v2/repositories/{namespace})
-	GetRepositories(w http.ResponseWriter, r *http.Request, namespace string, params GetRepositoriesParams)
+	GetRepositories(w http.ResponseWriter, r *http.Request, namespace string, params GetRepositoriesParams) (*RepositoryPage, *Error)
 	// List repositories in a namespace
 	// (GET /v2/repositories/{namespace}/{repository})
-	GetRepository(w http.ResponseWriter, r *http.Request, namespace string, repository string)
+	GetRepository(w http.ResponseWriter, r *http.Request, namespace string, repository string) (*RepositoryWithDetails, *Error)
 	// Fetch dockerfile
 	// (GET /v2/repositories/{namespace}/{repository}/dockerfile)
-	GetDockerfile(w http.ResponseWriter, r *http.Request, namespace string, repository string)
+	GetDockerfile(w http.ResponseWriter, r *http.Request, namespace string, repository string) (*Dockerfile, *Error)
 	// List repositories in a namespace
 	// (GET /v2/repositories/{namespace}/{repository}/tags)
-	GetTags(w http.ResponseWriter, r *http.Request, namespace string, repository string, params GetTagsParams)
+	GetTags(w http.ResponseWriter, r *http.Request, namespace string, repository string, params GetTagsParams) (*TagPage, *Error)
 	// Get a tag
 	// (GET /v2/repositories/{namespace}/{repository}/tags/{tag})
-	GetTag(w http.ResponseWriter, r *http.Request, namespace string, repository string, tag string)
+	GetTag(w http.ResponseWriter, r *http.Request, namespace string, repository string, tag string) (*Tag, *Error)
 	// List images in tag
 	// (GET /v2/repositories/{namespace}/{repository}/tags/{tag}/images)
-	GetImages(w http.ResponseWriter, r *http.Request, namespace string, repository string, tag string)
+	GetImages(w http.ResponseWriter, r *http.Request, namespace string, repository string, tag string) ([]ImageWithDetails, *Error)
 	// Fetch current user
 	// (GET /v2/user)
-	GetCurrentUser(w http.ResponseWriter, r *http.Request)
+	GetCurrentUser(w http.ResponseWriter, r *http.Request) (*User, *Error)
 	// Update current user
 	// (PUT /v2/user)
-	UpdateCurrentUser(w http.ResponseWriter, r *http.Request)
+	UpdateCurrentUser(w http.ResponseWriter, r *http.Request) (*User, *Error)
 	// Fetch user
 	// (GET /v2/users/{user})
-	GetUser(w http.ResponseWriter, r *http.Request, user string)
+	GetUser(w http.ResponseWriter, r *http.Request, user string) (*User, *Error)
 	// Fetch user contributed repositories
 	// (GET /v2/users/{user}/repositories/contributed)
-	GetUserContributed(w http.ResponseWriter, r *http.Request, user string, params GetUserContributedParams)
+	GetUserContributed(w http.ResponseWriter, r *http.Request, user string, params GetUserContributedParams) (*RepositoryPage, *Error)
 	// Fetch user starred repositories
 	// (GET /v2/users/{user}/repositories/starred)
-	GetUserStarred(w http.ResponseWriter, r *http.Request, user string, params GetUserStarredParams)
+	GetUserStarred(w http.ResponseWriter, r *http.Request, user string, params GetUserStarredParams) (*RepositoryPage, *Error)
 }
 
 // ServerInterfaceWrapper converts contexts to parameters.
@@ -584,7 +591,16 @@ func (siw *ServerInterfaceWrapper) GetSearch(w http.ResponseWriter, r *http.Requ
 	}
 
 	var handler = func(w http.ResponseWriter, r *http.Request) {
-		siw.Handler.GetSearch(w, r, params)
+		res, err := siw.Handler.GetSearch(w, r, params)
+		if err != nil {
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(err.Status)
+			json.NewEncoder(w).Encode(err)
+			return
+		}
+
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(res)
 	}
 
 	for _, middleware := range siw.HandlerMiddlewares {
@@ -599,7 +615,16 @@ func (siw *ServerInterfaceWrapper) GetAccessTokens(w http.ResponseWriter, r *htt
 	ctx := r.Context()
 
 	var handler = func(w http.ResponseWriter, r *http.Request) {
-		siw.Handler.GetAccessTokens(w, r)
+		res, err := siw.Handler.GetAccessTokens(w, r)
+		if err != nil {
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(err.Status)
+			json.NewEncoder(w).Encode(err)
+			return
+		}
+
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(res)
 	}
 
 	for _, middleware := range siw.HandlerMiddlewares {
@@ -614,7 +639,16 @@ func (siw *ServerInterfaceWrapper) CreateAccessToken(w http.ResponseWriter, r *h
 	ctx := r.Context()
 
 	var handler = func(w http.ResponseWriter, r *http.Request) {
-		siw.Handler.CreateAccessToken(w, r)
+		res, err := siw.Handler.CreateAccessToken(w, r)
+		if err != nil {
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(err.Status)
+			json.NewEncoder(w).Encode(err)
+			return
+		}
+
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(res)
 	}
 
 	for _, middleware := range siw.HandlerMiddlewares {
@@ -658,7 +692,16 @@ func (siw *ServerInterfaceWrapper) GetOrganizations(w http.ResponseWriter, r *ht
 	}
 
 	var handler = func(w http.ResponseWriter, r *http.Request) {
-		siw.Handler.GetOrganizations(w, r, params)
+		res, err := siw.Handler.GetOrganizations(w, r, params)
+		if err != nil {
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(err.Status)
+			json.NewEncoder(w).Encode(err)
+			return
+		}
+
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(res)
 	}
 
 	for _, middleware := range siw.HandlerMiddlewares {
@@ -684,7 +727,16 @@ func (siw *ServerInterfaceWrapper) GetOrganization(w http.ResponseWriter, r *htt
 	}
 
 	var handler = func(w http.ResponseWriter, r *http.Request) {
-		siw.Handler.GetOrganization(w, r, organization)
+		res, err := siw.Handler.GetOrganization(w, r, organization)
+		if err != nil {
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(err.Status)
+			json.NewEncoder(w).Encode(err)
+			return
+		}
+
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(res)
 	}
 
 	for _, middleware := range siw.HandlerMiddlewares {
@@ -699,7 +751,16 @@ func (siw *ServerInterfaceWrapper) PostRepositories(w http.ResponseWriter, r *ht
 	ctx := r.Context()
 
 	var handler = func(w http.ResponseWriter, r *http.Request) {
-		siw.Handler.PostRepositories(w, r)
+		res, err := siw.Handler.PostRepositories(w, r)
+		if err != nil {
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(err.Status)
+			json.NewEncoder(w).Encode(err)
+			return
+		}
+
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(res)
 	}
 
 	for _, middleware := range siw.HandlerMiddlewares {
@@ -752,7 +813,16 @@ func (siw *ServerInterfaceWrapper) GetRepositories(w http.ResponseWriter, r *htt
 	}
 
 	var handler = func(w http.ResponseWriter, r *http.Request) {
-		siw.Handler.GetRepositories(w, r, namespace, params)
+		res, err := siw.Handler.GetRepositories(w, r, namespace, params)
+		if err != nil {
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(err.Status)
+			json.NewEncoder(w).Encode(err)
+			return
+		}
+
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(res)
 	}
 
 	for _, middleware := range siw.HandlerMiddlewares {
@@ -787,7 +857,16 @@ func (siw *ServerInterfaceWrapper) GetRepository(w http.ResponseWriter, r *http.
 	}
 
 	var handler = func(w http.ResponseWriter, r *http.Request) {
-		siw.Handler.GetRepository(w, r, namespace, repository)
+		res, err := siw.Handler.GetRepository(w, r, namespace, repository)
+		if err != nil {
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(err.Status)
+			json.NewEncoder(w).Encode(err)
+			return
+		}
+
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(res)
 	}
 
 	for _, middleware := range siw.HandlerMiddlewares {
@@ -822,7 +901,16 @@ func (siw *ServerInterfaceWrapper) GetDockerfile(w http.ResponseWriter, r *http.
 	}
 
 	var handler = func(w http.ResponseWriter, r *http.Request) {
-		siw.Handler.GetDockerfile(w, r, namespace, repository)
+		res, err := siw.Handler.GetDockerfile(w, r, namespace, repository)
+		if err != nil {
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(err.Status)
+			json.NewEncoder(w).Encode(err)
+			return
+		}
+
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(res)
 	}
 
 	for _, middleware := range siw.HandlerMiddlewares {
@@ -876,7 +964,16 @@ func (siw *ServerInterfaceWrapper) GetTags(w http.ResponseWriter, r *http.Reques
 	}
 
 	var handler = func(w http.ResponseWriter, r *http.Request) {
-		siw.Handler.GetTags(w, r, namespace, repository, params)
+		res, err := siw.Handler.GetTags(w, r, namespace, repository, params)
+		if err != nil {
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(err.Status)
+			json.NewEncoder(w).Encode(err)
+			return
+		}
+
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(res)
 	}
 
 	for _, middleware := range siw.HandlerMiddlewares {
@@ -920,7 +1017,16 @@ func (siw *ServerInterfaceWrapper) GetTag(w http.ResponseWriter, r *http.Request
 	}
 
 	var handler = func(w http.ResponseWriter, r *http.Request) {
-		siw.Handler.GetTag(w, r, namespace, repository, tag)
+		res, err := siw.Handler.GetTag(w, r, namespace, repository, tag)
+		if err != nil {
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(err.Status)
+			json.NewEncoder(w).Encode(err)
+			return
+		}
+
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(res)
 	}
 
 	for _, middleware := range siw.HandlerMiddlewares {
@@ -964,7 +1070,16 @@ func (siw *ServerInterfaceWrapper) GetImages(w http.ResponseWriter, r *http.Requ
 	}
 
 	var handler = func(w http.ResponseWriter, r *http.Request) {
-		siw.Handler.GetImages(w, r, namespace, repository, tag)
+		res, err := siw.Handler.GetImages(w, r, namespace, repository, tag)
+		if err != nil {
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(err.Status)
+			json.NewEncoder(w).Encode(err)
+			return
+		}
+
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(res)
 	}
 
 	for _, middleware := range siw.HandlerMiddlewares {
@@ -979,7 +1094,16 @@ func (siw *ServerInterfaceWrapper) GetCurrentUser(w http.ResponseWriter, r *http
 	ctx := r.Context()
 
 	var handler = func(w http.ResponseWriter, r *http.Request) {
-		siw.Handler.GetCurrentUser(w, r)
+		res, err := siw.Handler.GetCurrentUser(w, r)
+		if err != nil {
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(err.Status)
+			json.NewEncoder(w).Encode(err)
+			return
+		}
+
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(res)
 	}
 
 	for _, middleware := range siw.HandlerMiddlewares {
@@ -994,7 +1118,16 @@ func (siw *ServerInterfaceWrapper) UpdateCurrentUser(w http.ResponseWriter, r *h
 	ctx := r.Context()
 
 	var handler = func(w http.ResponseWriter, r *http.Request) {
-		siw.Handler.UpdateCurrentUser(w, r)
+		res, err := siw.Handler.UpdateCurrentUser(w, r)
+		if err != nil {
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(err.Status)
+			json.NewEncoder(w).Encode(err)
+			return
+		}
+
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(res)
 	}
 
 	for _, middleware := range siw.HandlerMiddlewares {
@@ -1020,7 +1153,16 @@ func (siw *ServerInterfaceWrapper) GetUser(w http.ResponseWriter, r *http.Reques
 	}
 
 	var handler = func(w http.ResponseWriter, r *http.Request) {
-		siw.Handler.GetUser(w, r, user)
+		res, err := siw.Handler.GetUser(w, r, user)
+		if err != nil {
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(err.Status)
+			json.NewEncoder(w).Encode(err)
+			return
+		}
+
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(res)
 	}
 
 	for _, middleware := range siw.HandlerMiddlewares {
@@ -1073,7 +1215,16 @@ func (siw *ServerInterfaceWrapper) GetUserContributed(w http.ResponseWriter, r *
 	}
 
 	var handler = func(w http.ResponseWriter, r *http.Request) {
-		siw.Handler.GetUserContributed(w, r, user, params)
+		res, err := siw.Handler.GetUserContributed(w, r, user, params)
+		if err != nil {
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(err.Status)
+			json.NewEncoder(w).Encode(err)
+			return
+		}
+
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(res)
 	}
 
 	for _, middleware := range siw.HandlerMiddlewares {
@@ -1126,7 +1277,16 @@ func (siw *ServerInterfaceWrapper) GetUserStarred(w http.ResponseWriter, r *http
 	}
 
 	var handler = func(w http.ResponseWriter, r *http.Request) {
-		siw.Handler.GetUserStarred(w, r, user, params)
+		res, err := siw.Handler.GetUserStarred(w, r, user, params)
+		if err != nil {
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(err.Status)
+			json.NewEncoder(w).Encode(err)
+			return
+		}
+
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(res)
 	}
 
 	for _, middleware := range siw.HandlerMiddlewares {
