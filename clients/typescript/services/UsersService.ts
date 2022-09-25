@@ -3,6 +3,7 @@
 /* eslint-disable */
 import type { RepositoryPage } from '../models/RepositoryPage';
 import type { User } from '../models/User';
+import type { UserUpdate } from '../models/UserUpdate';
 
 import type { CancelablePromise } from '../core/CancelablePromise';
 import type { BaseHttpRequest } from '../core/BaseHttpRequest';
@@ -10,6 +11,43 @@ import type { BaseHttpRequest } from '../core/BaseHttpRequest';
 export class UsersService {
 
   constructor(public readonly httpRequest: BaseHttpRequest) {}
+
+  /**
+   * Fetch current user
+   * Fetch current user
+   * @returns User User
+   * @throws ApiError
+   */
+  public getCurrentUser(): CancelablePromise<User> {
+    return this.httpRequest.request({
+      method: 'GET',
+      url: '/v2/user',
+      errors: {
+        500: `Internal server error`,
+      },
+    });
+  }
+
+  /**
+   * Update current user
+   * Update current user
+   * @param requestBody User update
+   * @returns User User
+   * @throws ApiError
+   */
+  public updateCurrentUser(
+    requestBody: UserUpdate,
+  ): CancelablePromise<User> {
+    return this.httpRequest.request({
+      method: 'PUT',
+      url: '/v2/user',
+      body: requestBody,
+      mediaType: 'application/json',
+      errors: {
+        500: `Internal server error`,
+      },
+    });
+  }
 
   /**
    * Fetch user

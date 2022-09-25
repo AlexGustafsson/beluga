@@ -435,7 +435,52 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Error"
-
+  /v2/user:
+    get:
+      operationId: get-current-user
+      summary: Fetch current user
+      description: Fetch current user
+      tags:
+        - Users
+      responses:
+        "200":
+          description: User
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+    put:
+      operationId: update-current-user
+      summary: Update current user
+      description: Update current user
+      tags:
+        - Users
+      requestBody:
+        description: User update
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UserUpdate"
+      responses:
+        "200":
+          description: User
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
   /v2/users/{user}:
     get:
       operationId: get-user
@@ -548,6 +593,52 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/RepositoryPage"
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /v2/access-tokens:
+    post:
+      operationId: create-access-token
+      summary: Create an access token
+      description: Create an access token
+      tags:
+        - Tokens
+      requestBody:
+        description: Token request
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TokenRequest"
+      responses:
+        "200":
+          description: Token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Token"
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+    get:
+      operationId: get-access-tokens
+      summary: Get access tokens
+      description: Get access tokens
+      tags:
+        - Tokens
+      responses:
+        "200":
+          description: Token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TokenPage"
         "500":
           description: Internal server error
           content:
@@ -1047,3 +1138,87 @@ components:
           enum: ["public", "private"]
         is_private:
           type: boolean
+    UserUpdate:
+      type: object
+      required:
+        - company
+        - full_name
+        - gravatar_email
+        - profile_url
+        - location
+      properties:
+        company:
+          type: string
+        full_name:
+          type: string
+        gravatar_email:
+          type: string
+        profile_url:
+          type: string
+        location:
+          type: string
+    TokenRequest:
+      type: object
+      required:
+        - token_label
+        - scopes
+      properties:
+        token_label:
+          type: string
+        scopes:
+          type: array
+          items:
+            type: string
+    Token:
+      type: object
+      required:
+        - uuid
+        - client_id
+        - client_ip
+        - creator_ua
+        - created_at
+        - last_used
+        - generated_by
+        - is_active
+        - token_label
+        - scopes
+      properties:
+        uuid:
+          type: string
+        client_id:
+          type: string
+        creator_ip:
+          type: string
+        creator_ua:
+          type: string
+        created_at:
+          type: string
+        last_used:
+          type: string
+          nullable: true
+        generated_by:
+          type: string
+        is_active:
+          type: boolean
+        token:
+          type: string
+        token_label:
+          type: string
+        scopes:
+          type: array
+          items:
+            type: string
+    TokenPage:
+      allOf:
+        - $ref: "#/components/schemas/Page"
+        - type: object
+          required:
+            - active_count
+            - results
+          properties:
+            active_count:
+              type: number
+            results:
+              type: array
+              items:
+                $ref: "#/components/schemas/Token"

@@ -15,7 +15,10 @@ import RepositorySettingsPage, {
   RepositorySettingsSettingsPage,
   RepositoryTagsSettingsPage,
 } from "./RepositorySettingsPage";
-import SettingsPage from "./SettingsPage";
+import SettingsPage, {
+  SettingsGeneralSettingsPage,
+  SettingsSecuritySettingsPage,
+} from "./SettingsPage";
 import UserProfilePage, {
   UserProfileContributedPage,
   UserProfileRepositoriesPage,
@@ -25,7 +28,7 @@ import { useAuth0 } from "@auth0/auth0-react";
 import { KeyboardArrowDown } from "@mui/icons-material";
 import { Button, Divider, Menu, MenuItem } from "@mui/material";
 import { useRef, useState } from "react";
-import { NavLink, Route, Routes } from "react-router-dom";
+import { Navigate, NavLink, Route, Routes } from "react-router-dom";
 
 export default function (): JSX.Element {
   const profileMenuRef = useRef<HTMLButtonElement | null>(null);
@@ -142,7 +145,21 @@ export default function (): JSX.Element {
           path="/layers/:namespace/:repositoryName/:tagName/images/:digest"
           element={<ImagePage />}
         />
-        <Route path="/settings/:page" element={<SettingsPage />} />
+        <Route path="/settings" element={<SettingsPage />}>
+          <Route index element={<Navigate replace to="general" />} />
+          <Route path="general" element={<SettingsGeneralSettingsPage />} />
+          <Route path="security" element={<SettingsSecuritySettingsPage />} />
+          <Route
+            path="default-privacy"
+            element={<SettingsGeneralSettingsPage />}
+          />
+          <Route
+            path="notifications"
+            element={<SettingsGeneralSettingsPage />}
+          />
+          <Route path="convert" element={<SettingsGeneralSettingsPage />} />
+          <Route path="deactivate" element={<SettingsGeneralSettingsPage />} />
+        </Route>
         <Route path="/u/:username" element={<UserProfilePage />}>
           <Route index element={<UserProfileRepositoriesPage />} />
           <Route path="starred" element={<UserProfileStarredPage />} />

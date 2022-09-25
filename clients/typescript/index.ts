@@ -27,9 +27,14 @@ export type { Summary } from './models/Summary';
 export type { SummaryPage } from './models/SummaryPage';
 export type { Tag } from './models/Tag';
 export type { TagPage } from './models/TagPage';
+export type { Token } from './models/Token';
+export type { TokenPage } from './models/TokenPage';
+export type { TokenRequest } from './models/TokenRequest';
 export type { User } from './models/User';
+export type { UserUpdate } from './models/UserUpdate';
 
 export { OrganizationsService } from './services/OrganizationsService';
 export { RepositoriesService } from './services/RepositoriesService';
 export { SearchService } from './services/SearchService';
+export { TokensService } from './services/TokensService';
 export { UsersService } from './services/UsersService';

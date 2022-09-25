@@ -45,6 +45,8 @@ func main() {
 	mux.Handle("/v2/orgs", api)
 	mux.Handle("/v2/orgs/", api)
 	mux.Handle("/v2/users/", api)
+	mux.Handle("/v2/user", api)
+	mux.Handle("/v2/access-tokens", api)
 	mux.Handle("/api/", api)
 	mux.Handle("/authorize", api)
 	mux.Handle("/oauth/token", api)

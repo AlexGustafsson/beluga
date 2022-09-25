@@ -284,6 +284,36 @@ type TagPage struct {
 	Results []Tag `json:"results"`
 }
 
+// Token defines model for Token.
+type Token struct {
+	ClientId    string   `json:"client_id"`
+	CreatedAt   string   `json:"created_at"`
+	CreatorIp   *string  `json:"creator_ip,omitempty"`
+	CreatorUa   string   `json:"creator_ua"`
+	GeneratedBy string   `json:"generated_by"`
+	IsActive    bool     `json:"is_active"`
+	LastUsed    *string  `json:"last_used"`
+	Scopes      []string `json:"scopes"`
+	Token       *string  `json:"token,omitempty"`
+	TokenLabel  string   `json:"token_label"`
+	Uuid        string   `json:"uuid"`
+}
+
+// TokenPage defines model for TokenPage.
+type TokenPage struct {
+	// Embedded struct due to allOf(#/components/schemas/Page)
+	Page `yaml:",inline"`
+	// Embedded fields due to inline allOf schema
+	ActiveCount float32 `json:"active_count"`
+	Results     []Token `json:"results"`
+}
+
+// TokenRequest defines model for TokenRequest.
+type TokenRequest struct {
+	Scopes     []string `json:"scopes"`
+	TokenLabel string   `json:"token_label"`
+}
+
 // User defines model for User.
 type User struct {
 	Company       string    `json:"company"`
@@ -297,6 +327,15 @@ type User struct {
 	Type          string    `json:"type"`
 	Username      string    `json:"username"`
 	Uuid          string    `json:"uuid"`
+}
+
+// UserUpdate defines model for UserUpdate.
+type UserUpdate struct {
+	Company       string `json:"company"`
+	FullName      string `json:"full_name"`
+	GravatarEmail string `json:"gravatar_email"`
+	Location      string `json:"location"`
+	ProfileUrl    string `json:"profile_url"`
 }
 
 // GetSearchParams defines parameters for GetSearch.
@@ -398,14 +437,26 @@ type GetUserStarredParams struct {
 // GetUserStarredParamsOrdering defines parameters for GetUserStarred.
 type GetUserStarredParamsOrdering string
 
+// CreateAccessTokenJSONRequestBody defines body for CreateAccessToken for application/json ContentType.
+type CreateAccessTokenJSONRequestBody = TokenRequest
+
 // PostRepositoriesJSONRequestBody defines body for PostRepositories for application/json ContentType.
 type PostRepositoriesJSONRequestBody = CreateRepositoryRequest
+
+// UpdateCurrentUserJSONRequestBody defines body for UpdateCurrentUser for application/json ContentType.
+type UpdateCurrentUserJSONRequestBody = UserUpdate
 
 // ServerInterface represents all server handlers.
 type ServerInterface interface {
 	// Perform a search
 	// (GET /api/content/v1/products/search)
 	GetSearch(w http.ResponseWriter, r *http.Request, params GetSearchParams)
+	// Get access tokens
+	// (GET /v2/access-tokens)
+	GetAccessTokens(w http.ResponseWriter, r *http.Request)
+	// Create an access token
+	// (POST /v2/access-tokens)
+	CreateAccessToken(w http.ResponseWriter, r *http.Request)
 	// Fetch organizations
 	// (GET /v2/orgs)
 	GetOrganizations(w http.ResponseWriter, r *http.Request, params GetOrganizationsParams)
@@ -433,6 +484,12 @@ type ServerInterface interface {
 	// List images in tag
 	// (GET /v2/repositories/{namespace}/{repository}/tags/{tag}/images)
 	GetImages(w http.ResponseWriter, r *http.Request, namespace string, repository string, tag string)
+	// Fetch current user
+	// (GET /v2/user)
+	GetCurrentUser(w http.ResponseWriter, r *http.Request)
+	// Update current user
+	// (PUT /v2/user)
+	UpdateCurrentUser(w http.ResponseWriter, r *http.Request)
 	// Fetch user
 	// (GET /v2/users/{user})
 	GetUser(w http.ResponseWriter, r *http.Request, user string)
@@ -528,6 +585,36 @@ func (siw *ServerInterfaceWrapper) GetSearch(w http.ResponseWriter, r *http.Requ
 
 	var handler = func(w http.ResponseWriter, r *http.Request) {
 		siw.Handler.GetSearch(w, r, params)
+	}
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler(w, r.WithContext(ctx))
+}
+
+// GetAccessTokens operation middleware
+func (siw *ServerInterfaceWrapper) GetAccessTokens(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	var handler = func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.GetAccessTokens(w, r)
+	}
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler(w, r.WithContext(ctx))
+}
+
+// CreateAccessToken operation middleware
+func (siw *ServerInterfaceWrapper) CreateAccessToken(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	var handler = func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.CreateAccessToken(w, r)
 	}
 
 	for _, middleware := range siw.HandlerMiddlewares {
@@ -887,6 +974,36 @@ func (siw *ServerInterfaceWrapper) GetImages(w http.ResponseWriter, r *http.Requ
 	handler(w, r.WithContext(ctx))
 }
 
+// GetCurrentUser operation middleware
+func (siw *ServerInterfaceWrapper) GetCurrentUser(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	var handler = func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.GetCurrentUser(w, r)
+	}
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler(w, r.WithContext(ctx))
+}
+
+// UpdateCurrentUser operation middleware
+func (siw *ServerInterfaceWrapper) UpdateCurrentUser(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	var handler = func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.UpdateCurrentUser(w, r)
+	}
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler(w, r.WithContext(ctx))
+}
+
 // GetUser operation middleware
 func (siw *ServerInterfaceWrapper) GetUser(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
@@ -1134,6 +1251,10 @@ func HandlerWithOptions(si ServerInterface, options GorillaServerOptions) http.H
 
 	r.HandleFunc(options.BaseURL+"/api/content/v1/products/search", wrapper.GetSearch).Methods("GET")
 
+	r.HandleFunc(options.BaseURL+"/v2/access-tokens", wrapper.GetAccessTokens).Methods("GET")
+
+	r.HandleFunc(options.BaseURL+"/v2/access-tokens", wrapper.CreateAccessToken).Methods("POST")
+
 	r.HandleFunc(options.BaseURL+"/v2/orgs", wrapper.GetOrganizations).Methods("GET")
 
 	r.HandleFunc(options.BaseURL+"/v2/orgs/{organization}", wrapper.GetOrganization).Methods("GET")
@@ -1151,6 +1272,10 @@ func HandlerWithOptions(si ServerInterface, options GorillaServerOptions) http.H
 	r.HandleFunc(options.BaseURL+"/v2/repositories/{namespace}/{repository}/tags/{tag}", wrapper.GetTag).Methods("GET")
 
 	r.HandleFunc(options.BaseURL+"/v2/repositories/{namespace}/{repository}/tags/{tag}/images", wrapper.GetImages).Methods("GET")
+
+	r.HandleFunc(options.BaseURL+"/v2/user", wrapper.GetCurrentUser).Methods("GET")
+
+	r.HandleFunc(options.BaseURL+"/v2/user", wrapper.UpdateCurrentUser).Methods("PUT")
 
 	r.HandleFunc(options.BaseURL+"/v2/users/{user}", wrapper.GetUser).Methods("GET")
 

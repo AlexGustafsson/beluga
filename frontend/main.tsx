@@ -15,6 +15,20 @@ import { BrowserRouter } from "react-router-dom";
 const theme = createTheme({
   typography: {
     fontFamily: ["Open Sans", "sans-serif"].join(","),
+    h2: {
+      fontSize: "22px",
+      fontWeight: 600,
+      lineHeight: "33px",
+    },
+    h3: {
+      fontSize: "18px",
+      fontWeight: 400,
+      lineHeight: "28px",
+    },
+    body1: {
+      fontSize: "14px",
+      lineHeight: 1.5,
+    },
   },
   components: {
     MuiChip: {
@@ -32,6 +46,15 @@ const theme = createTheme({
         },
         arrow: {
           color: "#27343B",
+        },
+      },
+    },
+    MuiFormHelperText: {
+      styleOverrides: {
+        root: {
+          margin: "2px 0",
+          padding: "0 6px",
+          maxWidth: "400px",
         },
       },
     },

@@ -2,6 +2,7 @@ package api
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"time"
 
@@ -33,7 +34,8 @@ func New(store *store.Store, log logging.Logger) *API {
 	router.HandleFunc("/oauth/token", api.Token).Methods(http.MethodPost)
 	router.HandleFunc("/v2/logout", api.Logout).Methods(http.MethodGet)
 
-	api.handler = handlers.CORS(handlers.AllowedOrigins([]string{"*"}), handlers.AllowedHeaders([]string{"Auth0-Client", "Content-Type"}))(HandlerFromMux(api, router))
+	// TODO: Configurable CORS origins
+	api.handler = handlers.CORS(handlers.AllowedOrigins([]string{"*"}), handlers.AllowedHeaders([]string{"Auth0-Client", "Content-Type"}), handlers.AllowedMethods([]string{http.MethodGet, http.MethodHead, http.MethodPost, http.MethodPut}))(HandlerFromMux(api, router))
 
 	return api
 }
@@ -311,12 +313,48 @@ func (a *API) GetOrganizations(w http.ResponseWriter, r *http.Request, params Ge
 func (a *API) PostRepositories(w http.ResponseWriter, r *http.Request) {
 	var repository Repository
 	if err := json.NewDecoder(r.Body).Decode(&repository); err != nil {
-		http.Error(w, "bad request", http.StatusBadRequest)
+		httpError(w, fmt.Errorf("bad request"), http.StatusBadRequest)
 		return
 	}
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
 	json.NewEncoder(w).Encode(repository)
+}
+
+func (a *API) GetCurrentUser(w http.ResponseWriter, r *http.Request) {
+	result := User{
+		Company:    "test",
+		DateJoined: time.Now(),
+		FullName:   "Bla Bla",
+		Id:         "",
+		Location:   "Sweden",
+		ProfileUrl: "http://example.com",
+		Type:       "org-type",
+		Username:   "test-user",
+	}
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(result)
+}
+
+func (a *API) UpdateCurrentUser(w http.ResponseWriter, r *http.Request) {
+	var update UserUpdate
+	if err := json.NewDecoder(r.Body).Decode(&update); err != nil {
+		httpError(w, fmt.Errorf("bad request"), http.StatusBadRequest)
+		return
+	}
+
+	result := User{
+		Company:    "test",
+		DateJoined: time.Now(),
+		FullName:   "Bla Bla",
+		Id:         "",
+		Location:   "Sweden",
+		ProfileUrl: "http://example.com",
+		Type:       "org-type",
+		Username:   "test-user",
+	}
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(result)
 }
 
 func (a *API) GetUser(w http.ResponseWriter, r *http.Request, user string) {
@@ -328,6 +366,7 @@ func (a *API) GetUser(w http.ResponseWriter, r *http.Request, user string) {
 		Location:   "Sweden",
 		ProfileUrl: "http://example.com",
 		Type:       "org-type",
+		Username:   "test-user",
 	}
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(result)
@@ -431,6 +470,33 @@ func (a *API) GetUserContributed(w http.ResponseWriter, r *http.Request, user st
 		Results: repositories,
 	}
 
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(result)
+}
+
+func (a *API) CreateAccessToken(w http.ResponseWriter, r *http.Request) {
+	token := "blga_pat_0hlJIJwMtum2YF16nNc6zxfHmwx3wzSo9j0iVkI8uRk"
+	result := Token{
+		TokenLabel: "test-token",
+		Token:      &token,
+		Scopes:     []string{"repo:admin"},
+	}
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(result)
+}
+
+func (a *API) GetAccessTokens(w http.ResponseWriter, r *http.Request) {
+	result := TokenPage{
+		Page:        Page{},
+		ActiveCount: 1,
+		Results: []Token{
+			{
+				TokenLabel: "test-token",
+				IsActive:   true,
+				Scopes:     []string{"repo:admin"},
+			},
+		},
+	}
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(result)
 }

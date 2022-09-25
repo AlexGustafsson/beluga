@@ -76,8 +76,7 @@ export function RepositoryOverviewPage(): JSX.Element {
         </Typography>
         <TextFieldCopy
           value={`docker pull ${repository?.namespace}/${repository?.name}`}
-          color="white"
-          backgroundColor="#27343B"
+          sx={{ color: "white", backgroundColor: "#27343B" }}
         ></TextFieldCopy>
       </Card>
     </Box>
