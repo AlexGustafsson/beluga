@@ -1,52 +1,17 @@
-import BreadcrumbSeparator from "../components/BreadcrumbSeparator";
-import "../styles/markdown.css";
-import { useSubPage } from "../utils";
-import { Schedule } from "@mui/icons-material";
-import { Breadcrumbs, Card, Divider, Stack, Tab, Tabs } from "@mui/material";
-import { NavLink, Outlet, useParams } from "react-router-dom";
+import BreadcrumbSeparator from "../../components/BreadcrumbSeparator";
+import { useSubPage } from "../../utils";
+import RepositoriesPage from "../RepositoriesPage";
+import GeneralSettingsPage from "./GeneralSettingsPage";
+import TagsSettingsPage from "./TagsSettingsPage";
+import { Breadcrumbs, Divider, Tab, Tabs } from "@mui/material";
+import { NavLink, Outlet, Route, useParams } from "react-router-dom";
 
-export function RepositoryGeneralSettingsPage() {
-  return (
-    <>
-      <Stack>
-        <Card className="p-5">
-          <h1>nginx/nginx</h1>
-          <h2>Description</h2>
-          <p>
-            <Schedule />
-            Last pushed: an hour ago
-          </p>
-        </Card>
-      </Stack>
-      <Stack direction="row" className="space-x-4">
-        <Card className="p-5 grow">
-          <h1>Tags and scans</h1>
-          <h2>Description</h2>
-          <p>
-            <Schedule />
-            Last pushed: an hour ago
-          </p>
-        </Card>
-        <Card className="p-5">
-          <h1>Automated Builds</h1>
-          <p>...</p>
-        </Card>
-      </Stack>
-      <Card className="p-5">
-        <h1>README</h1>
-        <p>Repository description is empty.</p>
-      </Card>
-    </>
-  );
-}
-
-export function RepositoryTagsSettingsPage() {
-  return <p>Tags</p>;
-}
-
-export function RepositorySettingsSettingsPage() {
-  return <p>Settings</p>;
-}
+export const subPages = [
+  <Route index element={<GeneralSettingsPage />} />,
+  <Route path="general" element={<GeneralSettingsPage />} />,
+  <Route path="tags" element={<TagsSettingsPage />} />,
+  <Route path="settings" element={<RepositoriesPage />} />,
+];
 
 export default function (): JSX.Element {
   const { namespace, repositoryName } = useParams();

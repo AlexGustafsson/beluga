@@ -1,3 +1,10 @@
+import { Navigate } from "react-router-dom";
+
 export default function (): JSX.Element {
-  return <div className="flex grow px-6 py-12"></div>;
+  // For now, redirect to the explore page instead
+  return (
+    <div className="grow">
+      <Navigate to="/explore" replace={true} />
+    </div>
+  );
 }

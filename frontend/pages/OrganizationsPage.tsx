@@ -1,4 +1,3 @@
-import "../styles/markdown.css";
 import { Button } from "@mui/material";
 
 export default function (): JSX.Element {

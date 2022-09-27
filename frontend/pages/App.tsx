@@ -1,4 +1,7 @@
 import Search from "../components/Search";
+import SettingsPage, {
+  subPages as accountSettingsPages,
+} from "./AccountSettingsPage";
 import CreateRepositoryPage from "./CreateRepositoryPage";
 import ExplorePage from "./ExplorePage";
 import FullPageLoading from "./FullPageLoading";
@@ -6,29 +9,18 @@ import HomePage from "./HomePage";
 import ImagePage from "./ImagePage";
 import OrganizationsPage from "./OrganizationsPage";
 import RepositoriesPage from "./RepositoriesPage";
-import RepositoryPage, {
-  RepositoryOverviewPage,
-  RepositoryTagPage,
-} from "./RepositoryPage";
+import RepositoryPage, { subPages as repositoryPages } from "./RepositoryPage";
 import RepositorySettingsPage, {
-  RepositoryGeneralSettingsPage,
-  RepositorySettingsSettingsPage,
-  RepositoryTagsSettingsPage,
+  subPages as repositorySettingsPages,
 } from "./RepositorySettingsPage";
-import SettingsPage, {
-  SettingsGeneralSettingsPage,
-  SettingsSecuritySettingsPage,
-} from "./SettingsPage";
 import UserProfilePage, {
-  UserProfileContributedPage,
-  UserProfileRepositoriesPage,
-  UserProfileStarredPage,
+  subPages as userSettingsPages,
 } from "./UserProfilePage";
 import { useAuth0 } from "@auth0/auth0-react";
 import { KeyboardArrowDown } from "@mui/icons-material";
 import { Button, Divider, Menu, MenuItem } from "@mui/material";
 import { useRef, useState } from "react";
-import { Navigate, NavLink, Route, Routes } from "react-router-dom";
+import { NavLink, Route, Routes } from "react-router-dom";
 
 export default function (): JSX.Element {
   const profileMenuRef = useRef<HTMLButtonElement | null>(null);
@@ -137,8 +129,7 @@ export default function (): JSX.Element {
           path="/r/:namespace/:repositoryName"
           element={<RepositoryPage />}
         >
-          <Route index element={<RepositoryOverviewPage />} />
-          <Route path="tags" element={<RepositoryTagPage />} />
+          {repositoryPages}
         </Route>
         <Route path="/_/:repositoryName" element={<RepositoryPage />} />
         <Route
@@ -146,24 +137,10 @@ export default function (): JSX.Element {
           element={<ImagePage />}
         />
         <Route path="/settings" element={<SettingsPage />}>
-          <Route index element={<Navigate replace to="general" />} />
-          <Route path="general" element={<SettingsGeneralSettingsPage />} />
-          <Route path="security" element={<SettingsSecuritySettingsPage />} />
-          <Route
-            path="default-privacy"
-            element={<SettingsGeneralSettingsPage />}
-          />
-          <Route
-            path="notifications"
-            element={<SettingsGeneralSettingsPage />}
-          />
-          <Route path="convert" element={<SettingsGeneralSettingsPage />} />
-          <Route path="deactivate" element={<SettingsGeneralSettingsPage />} />
+          {accountSettingsPages}
         </Route>
         <Route path="/u/:username" element={<UserProfilePage />}>
-          <Route index element={<UserProfileRepositoriesPage />} />
-          <Route path="starred" element={<UserProfileStarredPage />} />
-          <Route path="contributed" element={<UserProfileContributedPage />} />
+          {userSettingsPages}
         </Route>
         <Route path="/repositories" element={<RepositoriesPage />} />
         <Route path="/orgs" element={<OrganizationsPage />} />
@@ -172,10 +149,7 @@ export default function (): JSX.Element {
           path="/repository/:registryName/:namespace/:repositoryName"
           element={<RepositorySettingsPage />}
         >
-          <Route index element={<RepositoryGeneralSettingsPage />} />
-          <Route path="general" element={<RepositoryGeneralSettingsPage />} />
-          <Route path="tags" element={<RepositoryTagsSettingsPage />} />
-          <Route path="settings" element={<RepositorySettingsSettingsPage />} />
+          {repositorySettingsPages}
         </Route>
       </Routes>
       <footer

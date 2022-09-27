@@ -1,6 +1,5 @@
 import { useClient } from "../client";
 import BreadcrumbSeparator from "../components/BreadcrumbSeparator";
-import "../styles/markdown.css";
 import { useAuth0 } from "@auth0/auth0-react";
 import { Lock, Public } from "@mui/icons-material";
 import {

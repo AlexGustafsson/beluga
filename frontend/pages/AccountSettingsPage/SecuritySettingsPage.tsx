@@ -1,16 +1,11 @@
-import { Token, useClient, User } from "../client";
-import BreadcrumbSeparator from "../components/BreadcrumbSeparator";
-import TextFieldCopy from "../components/TextFieldCopy";
-import "../styles/markdown.css";
-import { useSubPage } from "../utils";
+import { Token, useClient } from "../../client";
+import TextFieldCopy from "../../components/TextFieldCopy";
 import { useAuth0 } from "@auth0/auth0-react";
-import { AccessTime, DataUsage, Person } from "@mui/icons-material";
 import {
   Backdrop,
-  Breadcrumbs,
+  Box,
   Button,
   Card,
-  Divider,
   Fade,
   FormControl,
   FormHelperText,
@@ -19,107 +14,17 @@ import {
   Modal,
   Select,
   Stack,
-  SvgIcon,
-  Tab,
-  Tabs,
   TextField,
   Typography,
 } from "@mui/material";
-import { Box } from "@mui/system";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { NavLink, Outlet } from "react-router-dom";
-
-export function SettingsGeneralSettingsPage(): JSX.Element {
-  const [user, setUser] = useState<User>();
-
-  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
-
-  const client = useClient();
-  useEffect(() => {
-    client.users.getCurrentUser().then((x) => {
-      setUser(x);
-    });
-  }, []);
-
-  const submit = useCallback(() => {
-    // TODO: form validation
-    setIsSubmitting(true);
-    client.users
-      .updateCurrentUser({
-        company: user?.company || "",
-        full_name: user?.full_name || "",
-        gravatar_email: user?.gravatar_email || "",
-        profile_url: user?.profile_url || "",
-        location: user?.location || "",
-      })
-      .then(() => {
-        setIsSubmitting(false);
-      })
-      .catch(() => {
-        setIsSubmitting(false);
-      });
-  }, [user]);
-
-  if (!user) {
-    return <></>;
-  }
-
-  return (
-    <Card className="flex flex-col p-6 w-full space-y-6">
-      <Typography variant="h3">Account Information</Typography>
-      <Typography variant="body1">
-        This information will be visible to all users of Beluga.
-      </Typography>
-      <TextField
-        placeholder="Full Name"
-        value={user.full_name}
-        onChange={(e) => setUser((x) => ({ ...x!, full_name: e.target.value }))}
-      />
-      <TextField
-        placeholder="Company"
-        value={user.company}
-        onChange={(e) => setUser((x) => ({ ...x!, company: e.target.value }))}
-      />
-      <TextField
-        placeholder="Location"
-        value={user.location}
-        onChange={(e) => setUser((x) => ({ ...x!, location: e.target.value }))}
-      />
-      <TextField
-        placeholder="Website"
-        value={user.profile_url}
-        onChange={(e) =>
-          setUser((x) => ({ ...x!, profile_url: e.target.value }))
-        }
-      />
-      <TextField
-        placeholder="Gravatar Email"
-        value={user.gravatar_email}
-        onChange={(e) =>
-          setUser((x) => ({ ...x!, gravatar_email: e.target.value }))
-        }
-      />
-      <Button
-        variant="contained"
-        className="self-start"
-        sx={{ textTransform: "none" }}
-        onClick={submit}
-        disabled={isSubmitting}
-      >
-        {isSubmitting ? "Saving" : "Save"}
-      </Button>
-    </Card>
-  );
-}
 
 interface ModalProps {
   open: boolean;
-  onClose:
-    | ((
-        event: {},
-        reason: "backdropClick" | "escapeKeyDown" | "canceled" | "completed"
-      ) => void)
-    | undefined;
+  onClose: (
+    event: {},
+    reason: "backdropClick" | "escapeKeyDown" | "canceled" | "completed"
+  ) => void;
 }
 
 function AccessTokenPopup({ open, onClose }: ModalProps): JSX.Element {
@@ -129,7 +34,7 @@ function AccessTokenPopup({ open, onClose }: ModalProps): JSX.Element {
   const [token, setToken] = useState<Token>();
   const { user } = useAuth0();
 
-  const tokenPermissionDescriptions = useMemo(
+  const tokenPermissionDescriptions = useMemo<Record<string, string>>(
     () => ({
       "repo:admin":
         "Read, Write, Delete tokens allow you to manage your repositories.",
@@ -143,7 +48,7 @@ function AccessTokenPopup({ open, onClose }: ModalProps): JSX.Element {
     []
   );
 
-  const tokenPermissionNames = useMemo(
+  const tokenPermissionNames = useMemo<Record<string, string>>(
     () => ({
       "repo:admin": "Read, Write, Delete",
       "repo:write": "Read & Write",
@@ -153,7 +58,7 @@ function AccessTokenPopup({ open, onClose }: ModalProps): JSX.Element {
     []
   );
 
-  const tokenPermissionDescription: string =
+  const tokenPermissionDescription =
     tokenPermissionDescriptions[tokenPermissions];
 
   const client = useClient();
@@ -170,8 +75,8 @@ function AccessTokenPopup({ open, onClose }: ModalProps): JSX.Element {
   }, [tokenDescription, tokenPermissionDescription]);
 
   const copyAndClose = useCallback(() => {
-    navigator.clipboard.writeText(token.token!);
-    onClose("completed");
+    navigator.clipboard.writeText(token!.token!);
+    onClose({}, "completed");
   }, [token]);
 
   const createTokenCard = token ? (
@@ -244,7 +149,7 @@ function AccessTokenPopup({ open, onClose }: ModalProps): JSX.Element {
       >
         Access Token Description
       </Typography>
-      <Typography variant="body1">{token!.token_label}</Typography>
+      <Typography variant="body1">{token.token_label}</Typography>
       <Typography
         variant="body1"
         sx={{ textTransform: "uppercase", marginTop: "22px" }}
@@ -301,7 +206,7 @@ function AccessTokenPopup({ open, onClose }: ModalProps): JSX.Element {
   );
 }
 
-export function SettingsSecuritySettingsPage(): JSX.Element {
+export default function (): JSX.Element {
   const [tokenModalOpen, setTokenModalOpen] = useState<boolean>(false);
   const [tokens, setTokens] = useState<Token[]>([]);
 
@@ -360,158 +265,5 @@ export function SettingsSecuritySettingsPage(): JSX.Element {
         onClose={() => setTokenModalOpen(false)}
       />
     </Card>
-  );
-}
-
-export default function (): JSX.Element {
-  const tab = useSubPage(
-    [
-      "general",
-      "security",
-      "default-privacy",
-      "notifications",
-      "convert",
-      "deactivate",
-    ],
-    "general"
-  );
-
-  const [user, setUser] = useState<User>();
-
-  const client = useClient();
-  useEffect(() => {
-    client.users.getCurrentUser().then((x) => {
-      setUser(x);
-    });
-  }, []);
-
-  return (
-    <div className="flex flex-col grow">
-      <Breadcrumbs
-        aria-label="breadcrumb"
-        sx={{
-          paddingLeft: "12px",
-          paddingRight: "12px",
-          paddingTop: "11px",
-          paddingBottom: "11px",
-          fontSize: "14px",
-        }}
-        separator={<BreadcrumbSeparator />}
-      >
-        <NavLink to="/settings/general" className="hover:text-blue-500">
-          Account Settings
-        </NavLink>
-        <p className="text-sm text-blue-500 capitalize">
-          {tab?.replaceAll("-", " ")}
-        </p>
-      </Breadcrumbs>
-      <Divider orientation="horizontal" />
-      <header className="flex space-x-4">
-        <Stack direction="row" className="p-4 items-center">
-          <SvgIcon
-            component={DataUsage}
-            inheritViewBox
-            sx={{ width: "120px", height: "120px" }}
-          />
-          <Stack className="ml-8" sx={{ color: "#445d6e" }}>
-            <h2 className="text-xl font-semibold">{user?.username}</h2>
-            <Stack
-              direction="row"
-              className="text-xs items-center mt-3"
-              sx={{ color: "#8f9ea8", fill: "#8f9ea8" }}
-            >
-              <Person sx={{ width: "18px", height: "18px" }} />
-              <p className="ml-1">Community User</p>
-              <AccessTime
-                className="ml-4"
-                sx={{ width: "18px", height: "18px" }}
-              />
-              <p className="ml-1">{user?.date_joined}</p>
-            </Stack>
-          </Stack>
-        </Stack>
-      </header>
-      <div
-        className="flex flex-row grow p-6"
-        style={{ backgroundColor: "#f7f7f8" }}
-      >
-        <menu>
-          <Tabs
-            orientation="vertical"
-            variant="scrollable"
-            value={tab}
-            sx={{
-              ".MuiTabs-indicator": {
-                left: 0,
-              },
-            }}
-          >
-            <Tab
-              component={NavLink}
-              to="general"
-              value="general"
-              label="General"
-              sx={{
-                alignItems: "flex-start",
-                textTransform: "none",
-              }}
-            />
-            <Tab
-              component={NavLink}
-              to="security"
-              value="security"
-              label="Security"
-              sx={{
-                alignItems: "flex-start",
-                textTransform: "none",
-              }}
-            />
-            <Tab
-              component={NavLink}
-              to="default-privacy"
-              value="default-privacy"
-              label="Default Privacy"
-              sx={{
-                alignItems: "flex-start",
-                textTransform: "none",
-              }}
-            />
-            <Tab
-              component={NavLink}
-              to="notifications"
-              value="notifications"
-              label="Notifications"
-              sx={{
-                alignItems: "flex-start",
-                textTransform: "none",
-              }}
-            />
-            <Tab
-              component={NavLink}
-              to="convert"
-              value="convert"
-              label="Convert Account"
-              sx={{
-                alignItems: "flex-start",
-                textTransform: "none",
-              }}
-            />
-            <Tab
-              component={NavLink}
-              to="deactivate"
-              value="deactivate"
-              label="Deactivate Account"
-              sx={{
-                alignItems: "flex-start",
-                textTransform: "none",
-              }}
-            />
-          </Tabs>
-        </menu>
-        <main className="ml-6 grow">
-          <Outlet />
-        </main>
-      </div>
-    </div>
   );
 }

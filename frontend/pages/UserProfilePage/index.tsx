@@ -1,77 +1,19 @@
-import { Repository, useClient, User } from "../client";
-import "../styles/markdown.css";
-import { useSubPage } from "../utils";
+import { useClient, User } from "../../client";
+import { useSubPage } from "../../utils";
+import RepositoriesPage from "../RepositoriesPage";
+import ContributedPage from "./ContributedPage";
+import StarredPage from "./StarredPage";
 import { AccessTime, DataUsage, Person } from "@mui/icons-material";
 import { Divider, Stack, SvgIcon, Tab, Tabs } from "@mui/material";
 import { Box } from "@mui/system";
 import { useEffect, useState } from "react";
-import { NavLink, Outlet, useParams } from "react-router-dom";
+import { NavLink, Outlet, Route, useParams } from "react-router-dom";
 
-export function UserProfileRepositoriesPage(): JSX.Element {
-  const { username } = useParams();
-  const [repositories, setRepositories] = useState<Repository[]>([]);
-
-  const client = useClient();
-  useEffect(() => {
-    // TODO: Pagination
-    client.repositories.getRepositories(username!).then((x) => {
-      setRepositories(x.results);
-    });
-  }, []);
-
-  // TODO: Use a card. There are too many box, card variations, hard to maintain
-  return (
-    <>
-      {repositories.map((repository) => (
-        <p>{repository.name}</p>
-      ))}
-    </>
-  );
-}
-
-export function UserProfileStarredPage(): JSX.Element {
-  const { username } = useParams();
-  const [repositories, setRepositories] = useState<Repository[]>([]);
-
-  const client = useClient();
-  useEffect(() => {
-    // TODO: Pagination
-    client.users.getUserStarred(username!).then((x) => {
-      setRepositories(x.results);
-    });
-  }, []);
-
-  // TODO: Use a card. There are too many box, card variations, hard to maintain
-  return (
-    <>
-      {repositories.map((repository) => (
-        <p>{repository.name}</p>
-      ))}
-    </>
-  );
-}
-
-export function UserProfileContributedPage(): JSX.Element {
-  const { username } = useParams();
-  const [repositories, setRepositories] = useState<Repository[]>([]);
-
-  const client = useClient();
-  useEffect(() => {
-    // TODO: Pagination
-    client.users.getUserContributed(username!).then((x) => {
-      setRepositories(x.results);
-    });
-  }, []);
-
-  // TODO: Use a card. There are too many box, card variations, hard to maintain
-  return (
-    <>
-      {repositories.map((repository) => (
-        <p>{repository.name}</p>
-      ))}
-    </>
-  );
-}
+export const subPages = [
+  <Route index element={<RepositoriesPage />} />,
+  <Route path="starred" element={<StarredPage />} />,
+  <Route path="contributed" element={<ContributedPage />} />,
+];
 
 export default function (): JSX.Element {
   const { username } = useParams();
