@@ -12,20 +12,6 @@ import {
   Theme,
 } from "@mui/material";
 
-const top100Films = [
-  { title: "The Shawshank Redemption", year: 1994 },
-  { title: "The Godfather", year: 1972 },
-  { title: "The Godfather: Part II", year: 1974 },
-  { title: "The Dark Knight", year: 2008 },
-  { title: "12 Angry Men", year: 1957 },
-  { title: "Schindler's List", year: 1993 },
-  { title: "Pulp Fiction", year: 1994 },
-  {
-    title: "The Lord of the Rings: The Return of the King",
-    year: 2003,
-  },
-];
-
 function CustomPopper(props: PopperProps) {
   return (
     <Popper
@@ -47,35 +33,64 @@ function CustomPopper(props: PopperProps) {
   );
 }
 
-/** A search box implementation using a TextField. */
-export default function ({
-  sx,
-  placeholder,
-}: {
+export interface ISearchOption<T> {
+  title: string;
+  value: T;
+}
+
+export interface ISearchOptions<T> {
+  group: string;
+  matches: number;
+  options: ISearchOption<T>[];
+}
+
+interface Props<T> {
+  options: ISearchOptions<T>;
   sx?: SxProps<Theme>;
   placeholder?: string;
-}): JSX.Element {
-  const options = top100Films
-    .map((option) => {
-      const firstLetter = option.title[0].toUpperCase();
-      return {
-        firstLetter: /\d/.test(firstLetter) ? "0-9" : firstLetter,
-        ...option,
-      };
-    })
-    .sort((a, b) => -b.firstLetter.localeCompare(a.firstLetter));
+  value: string;
+  onChange?: (_: string) => void;
+  selected: ISearchOption<T> | null;
+  onSelectedChange?: (_: ISearchOption<T> | null) => void;
+}
 
+/** A search box implementation using a TextField. */
+// TODO: currently the component is hard coded to one group.
+// We should support multipe, for example by providing a list of ISearchOptions
+// and handling that instead.
+export default function <T>({
+  options,
+  sx,
+  placeholder,
+  onChange,
+  value,
+  selected,
+  onSelectedChange,
+}: Props<T>): JSX.Element {
   return (
     <Box>
       <Autocomplete
-        id="grouped-demo"
-        options={options}
+        value={selected}
+        onChange={(_, value) => {
+          if (onSelectedChange && typeof value !== "string") {
+            onSelectedChange(value);
+          }
+        }}
+        inputValue={value}
+        onInputChange={(_, value) => {
+          if (onChange) {
+            onChange(value);
+          }
+        }}
+        options={options.options}
         freeSolo
         disablePortal
         PopperComponent={CustomPopper}
         disableClearable
-        groupBy={(option) => option.firstLetter}
-        getOptionLabel={(option) => option.title}
+        groupBy={() => options.group}
+        getOptionLabel={(option) =>
+          typeof option === "string" ? option : option.title
+        }
         ListboxProps={{ style: { maxHeight: "418px" } }}
         renderGroup={(params) => [
           <ListSubheader
@@ -92,7 +107,7 @@ export default function ({
           >
             {params.group} (308)
           </ListSubheader>,
-          ...(params.children ?? []),
+          params.children,
         ]}
         renderOption={(props, option) => (
           <ListItem

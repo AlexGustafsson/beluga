@@ -1,4 +1,6 @@
-import Search from "../components/Search";
+import { Summary, useClient } from "../client";
+import Search, { ISearchOption, ISearchOptions } from "../components/Search";
+import { useDebounce } from "../utils";
 import SettingsPage, {
   subPages as accountSettingsPages,
 } from "./AccountSettingsPage";
@@ -19,14 +21,78 @@ import UserProfilePage, {
 import { useAuth0 } from "@auth0/auth0-react";
 import { KeyboardArrowDown } from "@mui/icons-material";
 import { Button, Divider, Menu, MenuItem } from "@mui/material";
-import { useRef, useState } from "react";
-import { NavLink, Route, Routes } from "react-router-dom";
+import { useEffect, useRef, useState } from "react";
+import { NavLink, Route, Routes, useNavigate } from "react-router-dom";
+
+function useSearch() {
+  const [searchString, setSearchString] = useState<string>("");
+  const [selected, setSelected] = useState<ISearchOption<Summary> | null>(null);
+  const [searchOptions, setSearchOptions] = useState<ISearchOptions<Summary>>({
+    group: "",
+    matches: 0,
+    options: [],
+  });
+
+  const client = useClient();
+
+  const query = useDebounce(searchString, 250);
+
+  useEffect(() => {
+    if (query.length < 2) {
+      setSearchOptions({
+        group: "Community",
+        matches: 0,
+        options: [],
+      });
+      return;
+    }
+
+    client.search
+      .getSearch(5, undefined, undefined, undefined, query)
+      .then((x) => {
+        setSearchOptions({
+          group: "Community",
+          matches: x.count,
+          options: x.summaries.map((y) => ({
+            title: y.name,
+            group: "Community",
+            value: y,
+          })),
+        });
+      });
+  }, [query]);
+
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (selected) {
+      navigate(`/r/${selected.value.slug}`);
+    }
+  }, [selected]);
+
+  const searchElement = (
+    <Search
+      options={searchOptions}
+      placeholder="Search for great content (e.g., mysql)"
+      sx={{
+        backgroundColor: "rgba(255, 255, 255, 0.2)",
+      }}
+      value={searchString}
+      onChange={(x) => setSearchString(x)}
+      selected={selected}
+      onSelectedChange={(x) => setSelected(x)}
+    />
+  );
+
+  return { searchElement };
+}
 
 export default function (): JSX.Element {
   const profileMenuRef = useRef<HTMLButtonElement | null>(null);
   const [profileMenuOpen, setProfileMenuOpen] = useState<boolean>(false);
 
-  // TODO: Implement user handling
+  const { searchElement } = useSearch();
+
   const { error, user, isAuthenticated, isLoading, loginWithRedirect, logout } =
     useAuth0();
 
@@ -50,12 +116,7 @@ export default function (): JSX.Element {
               Beluga
             </Button>
           </NavLink>
-          <Search
-            placeholder="Search for great content (e.g., mysql)"
-            sx={{
-              backgroundColor: "rgba(255, 255, 255, 0.2)",
-            }}
-          ></Search>
+          {searchElement}
         </div>
         <div className="flex items-center space-x-4">
           <NavLink to="/explore">
