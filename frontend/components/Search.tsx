@@ -47,6 +47,7 @@ function CustomPopper(props: PopperProps) {
   );
 }
 
+/** A search box implementation using a TextField. */
 export default function ({
   sx,
   placeholder,

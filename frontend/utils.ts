@@ -1,3 +1,4 @@
+/** Return the matched sub page. */
 export function useSubPage(
   available: string[],
   defaultPage?: string

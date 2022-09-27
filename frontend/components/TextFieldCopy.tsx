@@ -15,6 +15,7 @@ export interface Props {
   sx?: SxProps<Theme> & React.CSSProperties;
 }
 
+/** A copyable TextField implementation. */
 export default function ({ value, sx }: Props): JSX.Element {
   const [copied, setCopied] = useState<boolean>(false);
 

@@ -7,6 +7,7 @@ export interface Props {
   clientId: string;
 }
 
+/** A wrapper for Auth0Provider that handles React navigation. */
 export default function ({ children, domain, clientId }: Props) {
   const navigate = useNavigate();
 

@@ -1,5 +1,6 @@
 import { Divider } from "@mui/material";
 
+/** A custom Breadcrumb separator. */
 export default function (): JSX.Element {
   return (
     <Divider
