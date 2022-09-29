@@ -130,6 +130,7 @@ func (a *API) GetRepositories(w http.ResponseWriter, r *http.Request, namespace 
 }
 
 func (a *API) GetRepository(w http.ResponseWriter, r *http.Request, namespace string, repository string) (*RepositoryWithDetails, *Error) {
+	affiliation := "owner"
 	result := &RepositoryWithDetails{
 		Repository: Repository{
 			DateRegistered: time.Now(),
@@ -140,6 +141,7 @@ func (a *API) GetRepository(w http.ResponseWriter, r *http.Request, namespace st
 			PullCount:      100,
 			StarCount:      10,
 			Status:         1,
+			Affiliation:    &affiliation,
 		},
 		Description:     "A little repo",
 		FullDescription: "# Hello!",

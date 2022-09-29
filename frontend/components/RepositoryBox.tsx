@@ -2,6 +2,7 @@ import { RepositoryWithDetails } from "../client";
 import { DataUsage } from "@mui/icons-material";
 import {
   Box,
+  Button,
   Chip,
   Stack,
   SvgIcon,
@@ -54,22 +55,31 @@ export default function ({ sx, value }: Props): JSX.Element {
             />
           </Stack>
         </Stack>
-        <Stack direction="row" spacing={1}>
-          <Stack direction="column" sx={{ alignItems: "flex-end" }}>
-            <Typography variant="subtitle2" component="p">
-              {value.pull_count}
-            </Typography>
-            <Typography variant="subtitle2" component="p">
-              Downloads
-            </Typography>
-          </Stack>
-          <Stack direction="column" sx={{ alignItems: "flex-end" }}>
-            <Typography variant="subtitle2" component="p">
-              {value.star_count}
-            </Typography>
-            <Typography variant="subtitle2" component="p">
-              Stars
-            </Typography>
+        <Stack>
+          <NavLink to={`/repository/docker/${value.namespace}/${value.name}`}>
+            {value.affiliation === "owner" && (
+              <Button variant="outlined" sx={{ textTransform: "none" }}>
+                Manage Repository
+              </Button>
+            )}
+          </NavLink>
+          <Stack direction="row" spacing={1} className="mt-3 self-end">
+            <Stack direction="column" sx={{ alignItems: "flex-end" }}>
+              <Typography variant="subtitle2" component="p">
+                {value.pull_count}
+              </Typography>
+              <Typography variant="subtitle2" component="p">
+                Downloads
+              </Typography>
+            </Stack>
+            <Stack direction="column" sx={{ alignItems: "flex-end" }}>
+              <Typography variant="subtitle2" component="p">
+                {value.star_count}
+              </Typography>
+              <Typography variant="subtitle2" component="p">
+                Stars
+              </Typography>
+            </Stack>
           </Stack>
         </Stack>
       </Stack>
