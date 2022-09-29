@@ -24,6 +24,12 @@ const (
 	RepositoryRepositoryTypeImage RepositoryRepositoryType = "image"
 )
 
+// Defines values for RepositoryUpdatePrivacy.
+const (
+	RepositoryUpdatePrivacyPrivate RepositoryUpdatePrivacy = "private"
+	RepositoryUpdatePrivacyPublic  RepositoryUpdatePrivacy = "public"
+)
+
 // Defines values for SummaryType.
 const (
 	SummaryTypeImage SummaryType = "image"
@@ -210,6 +216,17 @@ type RepositoryPage struct {
 	// Embedded fields due to inline allOf schema
 	Results []Repository `json:"results"`
 }
+
+// RepositoryUpdate defines model for RepositoryUpdate.
+type RepositoryUpdate struct {
+	Description     *string                  `json:"description,omitempty"`
+	FullDescription *string                  `json:"full_description,omitempty"`
+	IsPrivate       *bool                    `json:"is_private,omitempty"`
+	Privacy         *RepositoryUpdatePrivacy `json:"privacy,omitempty"`
+}
+
+// RepositoryUpdatePrivacy defines model for RepositoryUpdate.Privacy.
+type RepositoryUpdatePrivacy string
 
 // RepositoryWithDetails defines model for RepositoryWithDetails.
 type RepositoryWithDetails struct {
@@ -450,6 +467,9 @@ type CreateAccessTokenJSONRequestBody = TokenRequest
 // PostRepositoriesJSONRequestBody defines body for PostRepositories for application/json ContentType.
 type PostRepositoriesJSONRequestBody = CreateRepositoryRequest
 
+// PatchRepositoryJSONRequestBody defines body for PatchRepository for application/json ContentType.
+type PatchRepositoryJSONRequestBody = RepositoryUpdate
+
 // UpdateCurrentUserJSONRequestBody defines body for UpdateCurrentUser for application/json ContentType.
 type UpdateCurrentUserJSONRequestBody = UserUpdate
 
@@ -479,6 +499,9 @@ type ServerInterface interface {
 	// List repositories in a namespace
 	// (GET /v2/repositories/{namespace}/{repository})
 	GetRepository(w http.ResponseWriter, r *http.Request, namespace string, repository string) (*RepositoryWithDetails, *Error)
+	// Patch repository
+	// (PATCH /v2/repositories/{namespace}/{repository})
+	PatchRepository(w http.ResponseWriter, r *http.Request, namespace string, repository string) (*RepositoryWithDetails, *Error)
 	// Fetch dockerfile
 	// (GET /v2/repositories/{namespace}/{repository}/dockerfile)
 	GetDockerfile(w http.ResponseWriter, r *http.Request, namespace string, repository string) (*Dockerfile, *Error)
@@ -858,6 +881,50 @@ func (siw *ServerInterfaceWrapper) GetRepository(w http.ResponseWriter, r *http.
 
 	var handler = func(w http.ResponseWriter, r *http.Request) {
 		res, err := siw.Handler.GetRepository(w, r, namespace, repository)
+		if err != nil {
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(err.Status)
+			json.NewEncoder(w).Encode(err)
+			return
+		}
+
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(res)
+	}
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler(w, r.WithContext(ctx))
+}
+
+// PatchRepository operation middleware
+func (siw *ServerInterfaceWrapper) PatchRepository(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	var err error
+
+	// ------------- Path parameter "namespace" -------------
+	var namespace string
+
+	err = runtime.BindStyledParameter("simple", false, "namespace", mux.Vars(r)["namespace"], &namespace)
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "namespace", Err: err})
+		return
+	}
+
+	// ------------- Path parameter "repository" -------------
+	var repository string
+
+	err = runtime.BindStyledParameter("simple", false, "repository", mux.Vars(r)["repository"], &repository)
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "repository", Err: err})
+		return
+	}
+
+	var handler = func(w http.ResponseWriter, r *http.Request) {
+		res, err := siw.Handler.PatchRepository(w, r, namespace, repository)
 		if err != nil {
 			w.Header().Set("Content-Type", "application/json")
 			w.WriteHeader(err.Status)
@@ -1424,6 +1491,8 @@ func HandlerWithOptions(si ServerInterface, options GorillaServerOptions) http.H
 	r.HandleFunc(options.BaseURL+"/v2/repositories/{namespace}", wrapper.GetRepositories).Methods("GET")
 
 	r.HandleFunc(options.BaseURL+"/v2/repositories/{namespace}/{repository}", wrapper.GetRepository).Methods("GET")
+
+	r.HandleFunc(options.BaseURL+"/v2/repositories/{namespace}/{repository}", wrapper.PatchRepository).Methods("PATCH")
 
 	r.HandleFunc(options.BaseURL+"/v2/repositories/{namespace}/{repository}/dockerfile", wrapper.GetDockerfile).Methods("GET")
 

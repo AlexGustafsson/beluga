@@ -199,6 +199,45 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Error"
+    patch:
+      operationId: patch-repository
+      summary: Patch repository
+      description: Patch repository
+      tags:
+        - Repositories
+      requestBody:
+        description: Repository update
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RepositoryUpdate"
+      parameters:
+        - in: path
+          name: namespace
+          description: User or organization
+          required: true
+          schema:
+            type: string
+        - in: path
+          name: repository
+          description: Name of the repository
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Repositories
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RepositoryWithDetails"
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
 
   /v2/repositories/{namespace}/{repository}/tags:
     get:
@@ -1228,3 +1267,15 @@ components:
       properties:
         contents:
           type: string
+    RepositoryUpdate:
+      type: object
+      properties:
+        description:
+          type: string
+        full_description:
+          type: string
+        privacy:
+          type: string
+          enum: ["public", "private"]
+        is_private:
+          type: boolean

@@ -4,6 +4,7 @@
 
 export type Error = {
   errinfo: any;
+  status: number;
   message: string;
 };
 

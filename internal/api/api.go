@@ -34,7 +34,7 @@ func New(store *store.Store, log logging.Logger) *API {
 	router.HandleFunc("/v2/logout", api.Logout).Methods(http.MethodGet)
 
 	// TODO: Configurable CORS origins
-	api.handler = handlers.CORS(handlers.AllowedOrigins([]string{"*"}), handlers.AllowedHeaders([]string{"Auth0-Client", "Content-Type"}), handlers.AllowedMethods([]string{http.MethodGet, http.MethodHead, http.MethodPost, http.MethodPut}))(HandlerFromMux(api, router))
+	api.handler = handlers.CORS(handlers.AllowedOrigins([]string{"*"}), handlers.AllowedHeaders([]string{"Auth0-Client", "Content-Type"}), handlers.AllowedMethods([]string{http.MethodGet, http.MethodHead, http.MethodPost, http.MethodPut, http.MethodPatch}))(HandlerFromMux(api, router))
 
 	return api
 }
@@ -130,6 +130,27 @@ func (a *API) GetRepositories(w http.ResponseWriter, r *http.Request, namespace 
 }
 
 func (a *API) GetRepository(w http.ResponseWriter, r *http.Request, namespace string, repository string) (*RepositoryWithDetails, *Error) {
+	affiliation := "owner"
+	result := &RepositoryWithDetails{
+		Repository: Repository{
+			DateRegistered: time.Now(),
+			IsPrivate:      false,
+			LastUpdated:    time.Now(),
+			Name:           "Foo",
+			Namespace:      "Bar",
+			PullCount:      100,
+			StarCount:      10,
+			Status:         1,
+			Affiliation:    &affiliation,
+		},
+		Description:     "A little repo",
+		FullDescription: "# Hello!",
+		HubUser:         "foo",
+	}
+	return result, nil
+}
+
+func (a *API) PatchRepository(w http.ResponseWriter, r *http.Request, namespace string, repository string) (*RepositoryWithDetails, *Error) {
 	affiliation := "owner"
 	result := &RepositoryWithDetails{
 		Repository: Repository{

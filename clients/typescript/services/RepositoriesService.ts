@@ -2,9 +2,11 @@
 /* tslint:disable */
 /* eslint-disable */
 import type { CreateRepositoryRequest } from '../models/CreateRepositoryRequest';
+import type { Dockerfile } from '../models/Dockerfile';
 import type { ImageWithDetails } from '../models/ImageWithDetails';
 import type { Repository } from '../models/Repository';
 import type { RepositoryPage } from '../models/RepositoryPage';
+import type { RepositoryUpdate } from '../models/RepositoryUpdate';
 import type { RepositoryWithDetails } from '../models/RepositoryWithDetails';
 import type { Tag } from '../models/Tag';
 import type { TagPage } from '../models/TagPage';
@@ -89,6 +91,35 @@ export class RepositoriesService {
         'namespace': namespace,
         'repository': repository,
       },
+      errors: {
+        500: `Internal server error`,
+      },
+    });
+  }
+
+  /**
+   * Patch repository
+   * Patch repository
+   * @param namespace User or organization
+   * @param repository Name of the repository
+   * @param requestBody Repository update
+   * @returns RepositoryWithDetails Repositories
+   * @throws ApiError
+   */
+  public patchRepository(
+    namespace: string,
+    repository: string,
+    requestBody: RepositoryUpdate,
+  ): CancelablePromise<RepositoryWithDetails> {
+    return this.httpRequest.request({
+      method: 'PATCH',
+      url: '/v2/repositories/{namespace}/{repository}',
+      path: {
+        'namespace': namespace,
+        'repository': repository,
+      },
+      body: requestBody,
+      mediaType: 'application/json',
       errors: {
         500: `Internal server error`,
       },
@@ -189,15 +220,13 @@ export class RepositoriesService {
    * Fetch dockerfile
    * @param namespace User or organization
    * @param repository Name of the repository
-   * @returns any Dockerfile
+   * @returns Dockerfile Dockerfile
    * @throws ApiError
    */
   public getDockerfile(
     namespace: string,
     repository: string,
-  ): CancelablePromise<{
-    contents?: string;
-  }> {
+  ): CancelablePromise<Dockerfile> {
     return this.httpRequest.request({
       method: 'GET',
       url: '/v2/repositories/{namespace}/{repository}/dockerfile',

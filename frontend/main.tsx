@@ -18,12 +18,14 @@ const theme = createTheme({
     h2: {
       fontSize: "22px",
       fontWeight: 600,
-      lineHeight: "33px",
     },
     h3: {
       fontSize: "18px",
       fontWeight: 400,
-      lineHeight: "28px",
+    },
+    h4: {
+      fontSize: "16px",
+      fontWeight: 500,
     },
     body1: {
       fontSize: "14px",
