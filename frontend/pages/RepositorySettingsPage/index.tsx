@@ -1,7 +1,7 @@
 import BreadcrumbSeparator from "../../components/BreadcrumbSeparator";
 import { useSubPage } from "../../utils";
-import RepositoriesPage from "../RepositoriesPage";
 import GeneralSettingsPage from "./GeneralSettingsPage";
+import RepositorySettingsPage from "./RepositorySettingsPage";
 import TagsSettingsPage from "./TagsSettingsPage";
 import { Breadcrumbs, Divider, Tab, Tabs } from "@mui/material";
 import { NavLink, Outlet, Route, useParams } from "react-router-dom";
@@ -10,7 +10,7 @@ export const subPages = [
   <Route index element={<GeneralSettingsPage />} />,
   <Route path="general" element={<GeneralSettingsPage />} />,
   <Route path="tags" element={<TagsSettingsPage />} />,
-  <Route path="settings" element={<RepositoriesPage />} />,
+  <Route path="settings" element={<RepositorySettingsPage />} />,
 ];
 
 export default function (): JSX.Element {
