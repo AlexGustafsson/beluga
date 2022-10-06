@@ -34,7 +34,7 @@ func New(store *store.Store, log logging.Logger) *API {
 	router.HandleFunc("/v2/logout", api.Logout).Methods(http.MethodGet)
 
 	// TODO: Configurable CORS origins
-	api.handler = handlers.CORS(handlers.AllowedOrigins([]string{"*"}), handlers.AllowedHeaders([]string{"Auth0-Client", "Content-Type"}), handlers.AllowedMethods([]string{http.MethodGet, http.MethodHead, http.MethodPost, http.MethodPut, http.MethodPatch}))(HandlerFromMux(api, router))
+	api.handler = handlers.CORS(handlers.AllowedOrigins([]string{"*"}), handlers.AllowedHeaders([]string{"Auth0-Client", "Content-Type"}), handlers.AllowedMethods([]string{http.MethodGet, http.MethodHead, http.MethodPost, http.MethodPut, http.MethodPatch, http.MethodDelete}))(HandlerFromMux(api, router))
 
 	return api
 }
@@ -169,6 +169,13 @@ func (a *API) PatchRepository(w http.ResponseWriter, r *http.Request, namespace 
 		HubUser:         "foo",
 	}
 	return result, nil
+}
+
+func (a *API) DeleteRepository(w http.ResponseWriter, r *http.Request, namespace string, repository string) *Error {
+	// TODO: won't include content type from result, right?
+	// One solution is to wrap http.ResponseWriter and pick the status from WriteHeader without writing it
+	w.WriteHeader(http.StatusAccepted)
+	return nil
 }
 
 func (a *API) GetDockerfile(w http.ResponseWriter, r *http.Request, namespace string, repository string) (*Dockerfile, *Error) {

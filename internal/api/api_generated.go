@@ -496,6 +496,9 @@ type ServerInterface interface {
 	// List repositories in a namespace
 	// (GET /v2/repositories/{namespace})
 	GetRepositories(w http.ResponseWriter, r *http.Request, namespace string, params GetRepositoriesParams) (*RepositoryPage, *Error)
+	// Delete repository
+	// (DELETE /v2/repositories/{namespace}/{repository})
+	DeleteRepository(w http.ResponseWriter, r *http.Request, namespace string, repository string) *Error
 	// List repositories in a namespace
 	// (GET /v2/repositories/{namespace}/{repository})
 	GetRepository(w http.ResponseWriter, r *http.Request, namespace string, repository string) (*RepositoryWithDetails, *Error)
@@ -846,6 +849,47 @@ func (siw *ServerInterfaceWrapper) GetRepositories(w http.ResponseWriter, r *htt
 
 		w.Header().Set("Content-Type", "application/json")
 		json.NewEncoder(w).Encode(res)
+	}
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler(w, r.WithContext(ctx))
+}
+
+// DeleteRepository operation middleware
+func (siw *ServerInterfaceWrapper) DeleteRepository(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	var err error
+
+	// ------------- Path parameter "namespace" -------------
+	var namespace string
+
+	err = runtime.BindStyledParameter("simple", false, "namespace", mux.Vars(r)["namespace"], &namespace)
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "namespace", Err: err})
+		return
+	}
+
+	// ------------- Path parameter "repository" -------------
+	var repository string
+
+	err = runtime.BindStyledParameter("simple", false, "repository", mux.Vars(r)["repository"], &repository)
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "repository", Err: err})
+		return
+	}
+
+	var handler = func(w http.ResponseWriter, r *http.Request) {
+		err := siw.Handler.DeleteRepository(w, r, namespace, repository)
+		if err != nil {
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(err.Status)
+			json.NewEncoder(w).Encode(err)
+			return
+		}
 	}
 
 	for _, middleware := range siw.HandlerMiddlewares {
@@ -1489,6 +1533,8 @@ func HandlerWithOptions(si ServerInterface, options GorillaServerOptions) http.H
 	r.HandleFunc(options.BaseURL+"/v2/repositories", wrapper.PostRepositories).Methods("POST")
 
 	r.HandleFunc(options.BaseURL+"/v2/repositories/{namespace}", wrapper.GetRepositories).Methods("GET")
+
+	r.HandleFunc(options.BaseURL+"/v2/repositories/{namespace}/{repository}", wrapper.DeleteRepository).Methods("DELETE")
 
 	r.HandleFunc(options.BaseURL+"/v2/repositories/{namespace}/{repository}", wrapper.GetRepository).Methods("GET")
 

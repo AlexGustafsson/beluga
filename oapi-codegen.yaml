@@ -20,7 +20,7 @@ output-options:
       type ServerInterface interface {
       {{range .}}{{.SummaryAsComment }}
       // ({{.Method}} {{.Path}})
-      {{.OperationId}}(w http.ResponseWriter, r *http.Request{{genParamArgs .PathParams}}{{if .RequiresParamObject}}, params {{.OperationId}}Params{{end}}) ({{range $index, $response := .Responses}}{{if $index}}, {{end}}{{$schema := (index .Contents 0).Schema}}{{if $schema.ArrayType}}{{else}}*{{end}}{{$schema.GoType}}{{end}})
+      {{.OperationId}}(w http.ResponseWriter, r *http.Request{{genParamArgs .PathParams}}{{if .RequiresParamObject}}, params {{.OperationId}}Params{{end}}) {{if (index .Responses 0).Contents}}({{range $index, $response := .Responses}}{{if $index}}, {{end}}{{$schema := (index .Contents 0).Schema}}{{if $schema.ArrayType}}{{else}}*{{end}}{{$schema.GoType}}{{end}}){{else}}*Error{{end}}
       {{end}}
       }
     # Hack of
@@ -203,6 +203,7 @@ output-options:
         {{end}}
 
         var handler = func(w http.ResponseWriter, r *http.Request) {
+          {{- if (index .Responses 0).Contents}}
           res, err := siw.Handler.{{.OperationId}}(w, r{{genParamNames .PathParams}}{{if .RequiresParamObject}}, params{{end}})
           if err != nil {
             w.Header().Set("Content-Type", "application/json")
@@ -213,6 +214,15 @@ output-options:
 
           w.Header().Set("Content-Type", "application/json")
           json.NewEncoder(w).Encode(res)
+          {{- else}}
+          err := siw.Handler.{{.OperationId}}(w, r{{genParamNames .PathParams}}{{if .RequiresParamObject}}, params{{end}})
+          if err != nil {
+            w.Header().Set("Content-Type", "application/json")
+            w.WriteHeader(err.Status)
+            json.NewEncoder(w).Encode(err)
+            return
+          }
+          {{- end}}
       }
 
         for _, middleware := range siw.HandlerMiddlewares {
