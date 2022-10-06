@@ -1,3 +1,4 @@
+import { useClient } from "../../client";
 import {
   Backdrop,
   Button,
@@ -12,7 +13,7 @@ import {
 } from "@mui/material";
 import { Box } from "@mui/system";
 import { useCallback, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 
 interface ModalProps {
   namespace: string;
@@ -96,10 +97,18 @@ export default function () {
   const { namespace, repositoryName } = useParams();
   const [deletePopupOpen, setDeletePopupOpen] = useState<boolean>(false);
 
-  const onDeleteModalClose = useCallback((_, reason) => {
+  const client = useClient();
+  const navigate = useNavigate();
+
+  const onDeleteModalClose = useCallback((_: {}, reason: string) => {
     setDeletePopupOpen(false);
     if (reason === "confirmed") {
-      // TODO: Delete
+      // TODO: Error handling
+      client.repositories
+        .deleteRepository(namespace!, repositoryName!)
+        .then(() => {
+          navigate("/repositories");
+        });
     }
   }, []);
 

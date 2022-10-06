@@ -127,6 +127,31 @@ export class RepositoriesService {
   }
 
   /**
+   * Delete repository
+   * Delete repository
+   * @param namespace User or organization
+   * @param repository Name of the repository
+   * @returns any Accepted
+   * @throws ApiError
+   */
+  public deleteRepository(
+    namespace: string,
+    repository: string,
+  ): CancelablePromise<any> {
+    return this.httpRequest.request({
+      method: 'DELETE',
+      url: '/v2/repositories/{namespace}/{repository}',
+      path: {
+        'namespace': namespace,
+        'repository': repository,
+      },
+      errors: {
+        500: `Internal server error`,
+      },
+    });
+  }
+
+  /**
    * List repositories in a namespace
    * List repositories in a namespace
    * @param namespace User or organization

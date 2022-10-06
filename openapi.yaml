@@ -238,6 +238,34 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Error"
+    delete:
+      operationId: delete-repository
+      summary: Delete repository
+      description: Delete repository
+      tags:
+        - Repositories
+      parameters:
+        - in: path
+          name: namespace
+          description: User or organization
+          required: true
+          schema:
+            type: string
+        - in: path
+          name: repository
+          description: Name of the repository
+          required: true
+          schema:
+            type: string
+      responses:
+        "202":
+          description: Accepted
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
 
   /v2/repositories/{namespace}/{repository}/tags:
     get:
