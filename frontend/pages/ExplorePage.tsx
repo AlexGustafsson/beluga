@@ -127,7 +127,7 @@ export default function (): JSX.Element {
             </MenuItem>
           </Select>
         </header>
-        <Stack direction="row" spacing={1}>
+        <Stack direction="row" spacing={1} sx={{ minHeight: "32px" }}>
           {filters.map((x) => (
             <Chip
               key={x}
