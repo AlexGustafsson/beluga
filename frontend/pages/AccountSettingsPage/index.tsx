@@ -12,10 +12,6 @@ export const subPages = [
   <Route index element={<Navigate replace to="general" />} />,
   <Route path="general" element={<GeneralSettingsPage />} />,
   <Route path="security" element={<SecuritySettingsPage />} />,
-  <Route path="default-privacy" element={<GeneralSettingsPage />} />,
-  <Route path="notifications" element={<GeneralSettingsPage />} />,
-  <Route path="convert" element={<GeneralSettingsPage />} />,
-  <Route path="deactivate" element={<GeneralSettingsPage />} />,
 ];
 
 export default function (): JSX.Element {
@@ -116,46 +112,6 @@ export default function (): JSX.Element {
               to="security"
               value="security"
               label="Security"
-              sx={{
-                alignItems: "flex-start",
-                textTransform: "none",
-              }}
-            />
-            <Tab
-              component={NavLink}
-              to="default-privacy"
-              value="default-privacy"
-              label="Default Privacy"
-              sx={{
-                alignItems: "flex-start",
-                textTransform: "none",
-              }}
-            />
-            <Tab
-              component={NavLink}
-              to="notifications"
-              value="notifications"
-              label="Notifications"
-              sx={{
-                alignItems: "flex-start",
-                textTransform: "none",
-              }}
-            />
-            <Tab
-              component={NavLink}
-              to="convert"
-              value="convert"
-              label="Convert Account"
-              sx={{
-                alignItems: "flex-start",
-                textTransform: "none",
-              }}
-            />
-            <Tab
-              component={NavLink}
-              to="deactivate"
-              value="deactivate"
-              label="Deactivate Account"
               sx={{
                 alignItems: "flex-start",
                 textTransform: "none",
