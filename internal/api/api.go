@@ -499,7 +499,7 @@ func (a *API) GetUserContributed(w http.ResponseWriter, r *http.Request, user st
 }
 
 func (a *API) CreateAccessToken(w http.ResponseWriter, r *http.Request) (*Token, *Error) {
-	token := "blga_pat_0hlJIJwMtum2YF16nNc6zxfHmwx3wzSo9j0iVkI8uRk"
+	token := "beluga_pat_0hlJIJwMtum2YF16nNc6zxfHmwx3wzSo9j0iVkI8uRk"
 	result := &Token{
 		TokenLabel: "test-token",
 		Token:      &token,
