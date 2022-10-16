@@ -82,6 +82,20 @@ const theme = createTheme({
         },
       },
     },
+    MuiTableHead: {
+      styleOverrides: {
+        root: {
+          fontWeight: 500,
+        },
+      },
+    },
+    MuiTableCell: {
+      styleOverrides: {
+        root: {
+          padding: "8px 16px 8px 16px",
+        },
+      },
+    },
   },
 });
 

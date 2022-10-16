@@ -514,8 +514,15 @@ func (a *API) GetAccessTokens(w http.ResponseWriter, r *http.Request) (*TokenPag
 		ActiveCount: 1,
 		Results: []Token{
 			{
+				Uuid:       "token-a",
 				TokenLabel: "test-token",
 				IsActive:   true,
+				Scopes:     []string{"repo:admin"},
+			},
+			{
+				Uuid:       "token-b",
+				TokenLabel: "test-token",
+				IsActive:   false,
 				Scopes:     []string{"repo:admin"},
 			},
 		},

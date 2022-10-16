@@ -1,23 +1,32 @@
 import { Token, useClient } from "../../client";
 import TextFieldCopy from "../../components/TextFieldCopy";
 import { useAuth0 } from "@auth0/auth0-react";
+import { MoreVert } from "@mui/icons-material";
 import {
   Backdrop,
   Box,
   Button,
   Card,
+  Checkbox,
   Fade,
   FormControl,
   FormHelperText,
+  IconButton,
   InputLabel,
   MenuItem,
   Modal,
   Select,
   Stack,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
   TextField,
   Typography,
 } from "@mui/material";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 interface ModalProps {
   open: boolean;
@@ -27,36 +36,30 @@ interface ModalProps {
   ) => void;
 }
 
+const tokenPermissionDescriptions: Record<string, string> = {
+  "repo:admin":
+    "Read, Write, Delete tokens allow you to manage your repositories.",
+  "repo:write":
+    "Read & Write tokens allow you to push images to any repository managed by your account.",
+  "repo:read":
+    "Read-only tokens allow you to view, search, and pull images from any public repositories and any private repositories that you have access to.",
+  "repo:public_read":
+    "Public Repo Read-only tokens allow to view, search, and pull images from any public repositories.",
+};
+
+const tokenPermissionNames: Record<string, string> = {
+  "repo:admin": "Read, Write, Delete",
+  "repo:write": "Read & Write",
+  "repo:read": "Read-only",
+  "repo:public_read": "Public Repo Read-only",
+};
+
 function AccessTokenPopup({ open, onClose }: ModalProps): JSX.Element {
   const [tokenDescription, setTokenDescription] = useState<string>("");
   const [tokenPermissions, setTokenPermissions] =
     useState<string>("repo:admin");
   const [token, setToken] = useState<Token>();
   const { user } = useAuth0();
-
-  const tokenPermissionDescriptions = useMemo<Record<string, string>>(
-    () => ({
-      "repo:admin":
-        "Read, Write, Delete tokens allow you to manage your repositories.",
-      "repo:write":
-        "Read & Write tokens allow you to push images to any repository managed by your account.",
-      "repo:read":
-        "Read-only tokens allow you to view, search, and pull images from any public repositories and any private repositories that you have access to.",
-      "repo:public_read":
-        "Public Repo Read-only tokens allow to view, search, and pull images from any public repositories.",
-    }),
-    []
-  );
-
-  const tokenPermissionNames = useMemo<Record<string, string>>(
-    () => ({
-      "repo:admin": "Read, Write, Delete",
-      "repo:write": "Read & Write",
-      "repo:read": "Read-only",
-      "repo:public_read": "Public Repo Read-only",
-    }),
-    []
-  );
 
   const tokenPermissionDescription =
     tokenPermissionDescriptions[tokenPermissions];
@@ -209,6 +212,7 @@ function AccessTokenPopup({ open, onClose }: ModalProps): JSX.Element {
 export default function (): JSX.Element {
   const [tokenModalOpen, setTokenModalOpen] = useState<boolean>(false);
   const [tokens, setTokens] = useState<Token[]>([]);
+  const [selectedTokens, setSelectedTokens] = useState<string[]>([]);
 
   const client = useClient();
   useEffect(() => {
@@ -218,25 +222,41 @@ export default function (): JSX.Element {
     });
   }, []);
 
+  // TODO: On delete, show delete modal
+  // TODO: On edit, show edit modal
+  // TODO: On "more" button, show edit modal
   return (
     <Card className="flex flex-col p-6 w-full space-y-6">
       <Stack direction="row" className="justify-between items-center">
         <Typography variant="h3">Access Tokens</Typography>
         {tokens.length > 0 && (
-          <Button
-            variant="contained"
-            sx={{ textTransform: "none" }}
-            onClick={() => setTokenModalOpen(true)}
-          >
-            New Access Token
-          </Button>
+          <Stack direction="row" spacing="18px">
+            {selectedTokens.length === 0 && (
+              <Button
+                variant="contained"
+                sx={{ textTransform: "none" }}
+                onClick={() => setTokenModalOpen(true)}
+              >
+                New Access Token
+              </Button>
+            )}
+            {selectedTokens.length > 0 && (
+              <Button
+                variant="outlined"
+                sx={{ textTransform: "none" }}
+                color="error"
+              >
+                Delete
+              </Button>
+            )}
+            {selectedTokens.length === 1 && (
+              <Button variant="outlined" sx={{ textTransform: "none" }}>
+                Edit
+              </Button>
+            )}
+          </Stack>
         )}
       </Stack>
-      {tokens.map((token) => (
-        <p key={token.uuid}>
-          {token.token_label} {token.scopes}
-        </p>
-      ))}
       {tokens.length == 0 && (
         <Stack
           className="items-center justify-center self-center"
@@ -259,6 +279,90 @@ export default function (): JSX.Element {
             New Access Token
           </Button>
         </Stack>
+      )}
+      {tokens.length > 0 && (
+        <TableContainer>
+          <Table>
+            <TableHead>
+              <TableRow>
+                <TableCell>
+                  <Checkbox
+                    checked={selectedTokens.length === tokens.length}
+                    onChange={(e) =>
+                      e.target.checked
+                        ? setSelectedTokens(tokens.map((x) => x.uuid))
+                        : setSelectedTokens([])
+                    }
+                  />
+                </TableCell>
+                <TableCell>Description</TableCell>
+                <TableCell>Scope</TableCell>
+                <TableCell>Last Used</TableCell>
+                <TableCell>Created</TableCell>
+                <TableCell>Active</TableCell>
+                <TableCell></TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {tokens.map((token) => (
+                <TableRow key={token.uuid}>
+                  <TableCell>
+                    <Checkbox
+                      checked={selectedTokens.includes(token.uuid)}
+                      onChange={(e) =>
+                        e.target.checked
+                          ? setSelectedTokens((x) => [...x, token.uuid])
+                          : setSelectedTokens((x) =>
+                              x.filter((y) => y !== token.uuid)
+                            )
+                      }
+                    />
+                  </TableCell>
+                  <TableCell
+                    component="th"
+                    scope="row"
+                    sx={
+                      token.is_active
+                        ? {
+                            position: "relative",
+                            "::before": {
+                              content: '" "',
+                              position: "absolute",
+                              left: 0,
+                              top: "calc(50% - 4px)",
+                              height: "8px",
+                              width: "8px",
+                              borderRadius: "50%",
+                              backgroundColor: "#54d1b0",
+                            },
+                          }
+                        : { color: "#90a0ac" }
+                    }
+                  >
+                    {token.token_label}
+                  </TableCell>
+                  <TableCell sx={token.is_active ? {} : { color: "#90a0ac" }}>
+                    {tokenPermissionNames[token.scopes[0]]}
+                  </TableCell>
+                  <TableCell sx={token.is_active ? {} : { color: "#90a0ac" }}>
+                    {token.last_used ?? "Never"}
+                  </TableCell>
+                  <TableCell sx={token.is_active ? {} : { color: "#90a0ac" }}>
+                    {token.created_at}
+                  </TableCell>
+                  <TableCell sx={token.is_active ? {} : { color: "#90a0ac" }}>
+                    {token.is_active ? "Yes" : "No"}
+                  </TableCell>
+                  <TableCell>
+                    <IconButton>
+                      <MoreVert />
+                    </IconButton>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </TableContainer>
       )}
       <AccessTokenPopup
         open={tokenModalOpen}
