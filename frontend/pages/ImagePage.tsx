@@ -86,7 +86,7 @@ export default function (): JSX.Element {
             gridGap: "14px",
           }}
         >
-          <Card className="relative h-max">
+          <Card className="relative h-max" sx={{ padding: "0px" }}>
             <ul>
               {image?.layers?.map((x, i) => (
                 <li
