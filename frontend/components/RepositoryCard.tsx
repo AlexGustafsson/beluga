@@ -1,6 +1,14 @@
 import { Repository, Summary } from "../client";
 import { DataUsage } from "@mui/icons-material";
-import { Card, Chip, Stack, SvgIcon, Typography } from "@mui/material";
+import {
+  Card,
+  Chip,
+  Stack,
+  SvgIcon,
+  SxProps,
+  Theme,
+  Typography,
+} from "@mui/material";
 import { NavLink } from "react-router-dom";
 
 export interface Props {
@@ -9,6 +17,8 @@ export interface Props {
   showPublisher?: boolean;
   showDownloads?: boolean;
   showStars?: boolean;
+  sx?: SxProps<Theme>;
+  className?: string;
 }
 
 export default function ({
@@ -17,6 +27,8 @@ export default function ({
   showPublisher = false,
   showDownloads = true,
   showStars = true,
+  sx,
+  className,
 }: Props): JSX.Element {
   const name = repository
     ? repository.namespace + "/" + repository.name
@@ -26,10 +38,10 @@ export default function ({
   const chips = summary?.architectures.map((x) => x.label);
   const stars = repository?.star_count || summary?.star_count;
   const pulls = repository?.pull_count || summary?.pull_count;
-  const publisher = repository?.namespace || summary?.publisher;
+  const publisher = repository?.namespace || summary?.publisher?.name;
 
   return (
-    <Card>
+    <Card sx={sx} className={className}>
       <Stack direction="row" spacing="15px">
         <SvgIcon
           component={DataUsage}
@@ -44,7 +56,7 @@ export default function ({
               By{" "}
               <NavLink
                 to={`/u/${publisher}`}
-                className="text-xs text-blue-500 underline"
+                className="text-xs text-blue-500 underline hover:decoration-2"
               >
                 {publisher || ""}
               </NavLink>{" "}

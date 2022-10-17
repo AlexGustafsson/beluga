@@ -1,8 +1,6 @@
 import { useClient, User } from "../../client";
 import { useSubPage } from "../../utils";
-import ContributedPage from "./ContributedPage";
 import RepositoriesPage from "./RepositoriesPage";
-import StarredPage from "./StarredPage";
 import { AccessTime, DataUsage, Person } from "@mui/icons-material";
 import { Divider, Stack, SvgIcon, Tab, Tabs } from "@mui/material";
 import { Box } from "@mui/system";
@@ -10,9 +8,12 @@ import { useEffect, useState } from "react";
 import { NavLink, Outlet, Route, useParams } from "react-router-dom";
 
 export const subPages = [
-  <Route index element={<RepositoriesPage />} />,
-  <Route path="starred" element={<StarredPage />} />,
-  <Route path="contributed" element={<ContributedPage />} />,
+  <Route index element={<RepositoriesPage category="owned" />} />,
+  <Route path="starred" element={<RepositoriesPage category="starred" />} />,
+  <Route
+    path="contributed"
+    element={<RepositoriesPage category="contributed" />}
+  />,
 ];
 
 export default function (): JSX.Element {
@@ -86,7 +87,14 @@ export default function (): JSX.Element {
         </Tabs>
       </Box>
       <Divider />
-      <Box sx={{ padding: "12px", backgroundColor: "#f7f7f8", flexGrow: 1 }}>
+      <Box
+        sx={{
+          padding: "12px",
+          paddingTop: "24px",
+          backgroundColor: "#f7f7f8",
+          flexGrow: 1,
+        }}
+      >
         <Outlet />
       </Box>
     </div>

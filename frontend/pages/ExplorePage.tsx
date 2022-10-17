@@ -146,7 +146,7 @@ export default function (): JSX.Element {
           {results.map((x) => (
             /** TODO: "library" repositories are served on /_/:name */
             <NavLink key={x.name} to={`/r/${x.slug}`}>
-              <RepositoryCard summary={x} />
+              <RepositoryCard summary={x} className="hover:drop-shadow-sm" />
             </NavLink>
           ))}
         </Stack>
