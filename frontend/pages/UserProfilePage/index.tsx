@@ -2,7 +2,7 @@ import { useClient, User } from "../../client";
 import { useSubPage } from "../../utils";
 import RepositoriesPage from "./RepositoriesPage";
 import { AccessTime, DataUsage, Person } from "@mui/icons-material";
-import { Divider, Stack, SvgIcon, Tab, Tabs } from "@mui/material";
+import { Divider, Stack, SvgIcon, Tab, Tabs, Typography } from "@mui/material";
 import { Box } from "@mui/system";
 import { useEffect, useState } from "react";
 import { NavLink, Outlet, Route, useParams } from "react-router-dom";
@@ -39,7 +39,16 @@ export default function (): JSX.Element {
             sx={{ width: "120px", height: "120px" }}
           />
           <Stack className="ml-8" sx={{ color: "#445d6e" }}>
-            <h2 className="text-xl font-semibold">{username}</h2>
+            <Stack direction="row" alignItems="flex-end" spacing="20px">
+              <Typography variant="h3" fontWeight="medium">
+                {username}
+              </Typography>
+              <NavLink to="/settings/general">
+                <Typography variant="body2" className="text-blue-500 underline">
+                  Edit profile
+                </Typography>
+              </NavLink>
+            </Stack>
             <Stack
               direction="row"
               className="text-xs items-center mt-3"
