@@ -1,5 +1,5 @@
 import { Summary, useClient } from "../client";
-import ImageCard from "../components/RepositoryCard";
+import RepositoryCard from "../components/RepositoryCard";
 import {
   Checkbox,
   Chip,
@@ -140,13 +140,13 @@ export default function (): JSX.Element {
         </Stack>
         <Stack
           direction="column"
-          spacing={1}
+          spacing="15px"
           sx={{ flexGrow: 1, marginTop: 1 }}
         >
           {results.map((x) => (
             /** TODO: "library" repositories are served on /_/:name */
             <NavLink key={x.name} to={`/r/${x.slug}`}>
-              <ImageCard value={x}></ImageCard>
+              <RepositoryCard summary={x} />
             </NavLink>
           ))}
         </Stack>

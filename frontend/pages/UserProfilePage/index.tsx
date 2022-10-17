@@ -1,7 +1,7 @@
 import { useClient, User } from "../../client";
 import { useSubPage } from "../../utils";
-import RepositoriesPage from "../RepositoriesPage";
 import ContributedPage from "./ContributedPage";
+import RepositoriesPage from "./RepositoriesPage";
 import StarredPage from "./StarredPage";
 import { AccessTime, DataUsage, Person } from "@mui/icons-material";
 import { Divider, Stack, SvgIcon, Tab, Tabs } from "@mui/material";

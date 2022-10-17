@@ -1,4 +1,6 @@
 import { Repository, useClient } from "../../client";
+import RepositoryCard from "../../components/RepositoryCard";
+import { Stack } from "@mui/material";
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 
@@ -14,12 +16,16 @@ export default function (): JSX.Element {
     });
   }, []);
 
-  // TODO: Use a card. There are too many box, card variations, hard to maintain
   return (
-    <>
+    <Stack spacing="15px">
       {repositories.map((repository) => (
-        <p>{repository.name}</p>
+        <RepositoryCard
+          key={repository.namespace + "/" + repository.name}
+          repository={repository}
+          showPublisher={true}
+          showDownloads={false}
+        />
       ))}
-    </>
+    </Stack>
   );
 }

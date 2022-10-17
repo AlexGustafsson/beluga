@@ -31,6 +31,10 @@ const theme = createTheme({
       fontSize: "14px",
       lineHeight: 1.5,
     },
+    body2: {
+      fontSize: "12px",
+      lineHeight: 1.43,
+    },
   },
   components: {
     MuiChip: {
