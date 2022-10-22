@@ -2,11 +2,13 @@ import { Tag } from "../client";
 import {
   Card,
   Stack,
+  SxProps,
   Table,
   TableBody,
   TableCell,
   TableHead,
   TableRow,
+  Theme,
   Typography,
 } from "@mui/material";
 import { NavLink, useNavigate } from "react-router-dom";
@@ -15,17 +17,19 @@ export interface Props {
   value: Tag;
   namespace: string;
   repositoryName: string;
+  sx?: SxProps<Theme>;
 }
 
 export default function ({
   namespace,
   repositoryName,
   value,
+  sx,
 }: Props): JSX.Element {
   const navigate = useNavigate();
 
   return (
-    <Card sx={{ padding: "24px" }}>
+    <Card sx={{ padding: "24px", ...sx }}>
       <Stack direction="column" spacing={2}>
         <p className="text-xs text-gray-500">TAG</p>
         <header className="flex justify-between">
