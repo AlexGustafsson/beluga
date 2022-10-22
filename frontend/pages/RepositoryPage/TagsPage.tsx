@@ -23,11 +23,20 @@ export default function (): JSX.Element {
 
   const client = useClient();
   useEffect(() => {
-    client.repositories.getTags(namespace!, repositoryName).then((x) => {
-      setPages(Math.ceil(x.count / x.page_size));
-      setResults(x.results);
-      setTotalResults(x.count);
-    });
+    client.repositories
+      .getTags(
+        namespace!,
+        repositoryName,
+        undefined,
+        undefined,
+        undefined,
+        page
+      )
+      .then((x) => {
+        setPages(Math.ceil(x.count / x.page_size));
+        setResults(x.results);
+        setTotalResults(x.count);
+      });
   }, [page]);
 
   return (
@@ -87,6 +96,7 @@ export default function (): JSX.Element {
       <Pagination
         count={pages}
         page={page + 1}
+        onChange={(_, page) => setPage(page)}
         shape="rounded"
         showFirstButton
         showLastButton

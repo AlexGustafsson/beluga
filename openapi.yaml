@@ -301,6 +301,18 @@ paths:
           required: false
           schema:
             type: string
+        - in: query
+          name: page_size
+          description: Page size
+          required: false
+          schema:
+            type: integer
+        - in: query
+          name: page
+          description: Page index
+          required: false
+          schema:
+            type: integer
       responses:
         "200":
           description: Repositories

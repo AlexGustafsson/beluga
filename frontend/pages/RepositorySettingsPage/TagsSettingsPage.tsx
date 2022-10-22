@@ -4,9 +4,11 @@ import { Clear, Search } from "@mui/icons-material";
 import {
   Button,
   Checkbox,
+  Divider,
   IconButton,
   InputAdornment,
   MenuItem,
+  Pagination,
   Select,
   Stack,
   TextField,
@@ -17,15 +19,26 @@ import { useParams } from "react-router-dom";
 export default function () {
   const { namespace, repositoryName } = useParams();
 
-  const [tags, setTags] = useState<Tag[]>([]);
+  const [pages, setPages] = useState<number>(0);
+  const [page, setPage] = useState<number>(0);
+  const [results, setResults] = useState<Tag[]>([]);
 
   const client = useClient();
   useEffect(() => {
-    // TODO: pagination
-    client.repositories.getTags(namespace!, repositoryName!).then((page) => {
-      setTags(page.results);
-    });
-  }, []);
+    client.repositories
+      .getTags(
+        namespace!,
+        repositoryName!,
+        undefined,
+        undefined,
+        undefined,
+        page
+      )
+      .then((x) => {
+        setPages(Math.ceil(x.count / x.page_size));
+        setResults(x.results);
+      });
+  }, [page]);
 
   return (
     <>
@@ -88,7 +101,7 @@ export default function () {
         </Button>
       </Stack>
       <Stack>
-        {tags.map((tag) => (
+        {results.map((tag) => (
           <Stack key={tag.digest} direction="row" alignItems="center">
             <Checkbox />
             <TagCard
@@ -103,6 +116,16 @@ export default function () {
           </Stack>
         ))}
       </Stack>
+      <Divider sx={{ marginTop: 2, marginBottom: 2 }} />
+      <Pagination
+        count={pages}
+        page={page + 1}
+        onChange={(_, page) => setPage(page)}
+        shape="rounded"
+        showFirstButton
+        showLastButton
+        sx={{ alignSelf: "center", marginTop: "24px", flexGrow: "1" }}
+      />
     </>
   );
 }

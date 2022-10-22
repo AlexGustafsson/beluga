@@ -158,6 +158,8 @@ export class RepositoriesService {
    * @param repository Name of the repository
    * @param ordering Sort order
    * @param name Prefix of label names to match against
+   * @param pageSize Page size
+   * @param page Page index
    * @returns TagPage Repositories
    * @throws ApiError
    */
@@ -166,6 +168,8 @@ export class RepositoriesService {
     repository: string,
     ordering: 'last_updated' | '-last_updated' | 'name' | '-name' = 'last_updated',
     name?: string,
+    pageSize?: number,
+    page?: number,
   ): CancelablePromise<TagPage> {
     return this.httpRequest.request({
       method: 'GET',
@@ -177,6 +181,8 @@ export class RepositoriesService {
       query: {
         'ordering': ordering,
         'name': name,
+        'page_size': pageSize,
+        'page': page,
       },
       errors: {
         500: `Internal server error`,
