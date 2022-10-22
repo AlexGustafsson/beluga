@@ -1,6 +1,6 @@
 # Beluga
 
-A self hosted Docker Hub.
+Beluga is (going to be) a self hosted Docker Hub.
 
 ## Development
 
