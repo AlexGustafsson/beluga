@@ -22,6 +22,7 @@ export default function () {
   const [pages, setPages] = useState<number>(0);
   const [page, setPage] = useState<number>(0);
   const [results, setResults] = useState<Tag[]>([]);
+  const [selectedTags, setSelectedTags] = useState<string[]>([]);
 
   const client = useClient();
   useEffect(() => {
@@ -43,7 +44,14 @@ export default function () {
   return (
     <>
       <Stack direction="row" alignItems="center">
-        <Checkbox />
+        <Checkbox
+          checked={selectedTags.length === results.length}
+          onChange={(e) =>
+            e.target.checked
+              ? setSelectedTags(results.map((x) => x.digest))
+              : setSelectedTags([])
+          }
+        />
         <Stack
           direction="row"
           alignItems="center"
@@ -96,14 +104,26 @@ export default function () {
             }}
           />
         </Stack>
-        <Button variant="outlined" color="error" sx={{ textTransform: "none" }}>
+        <Button
+          variant="outlined"
+          color="error"
+          sx={{ textTransform: "none" }}
+          disabled={selectedTags.length === 0}
+        >
           Delete
         </Button>
       </Stack>
       <Stack>
         {results.map((tag) => (
           <Stack key={tag.digest} direction="row" alignItems="center">
-            <Checkbox />
+            <Checkbox
+              checked={selectedTags.includes(tag.digest)}
+              onChange={(e) =>
+                e.target.checked
+                  ? setSelectedTags((x) => [...x, tag.digest])
+                  : setSelectedTags((x) => x.filter((y) => y !== tag.digest))
+              }
+            />
             <TagCard
               namespace={namespace!}
               repositoryName={repositoryName!}
