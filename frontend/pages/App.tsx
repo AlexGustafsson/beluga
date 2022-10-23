@@ -19,8 +19,8 @@ import UserProfilePage, {
   subPages as userSettingsPages,
 } from "./UserProfilePage";
 import { useAuth0 } from "@auth0/auth0-react";
-import { KeyboardArrowDown } from "@mui/icons-material";
-import { Button, Divider, Menu, MenuItem } from "@mui/material";
+import { Fingerprint, KeyboardArrowDown } from "@mui/icons-material";
+import { Avatar, Button, Divider, Menu, MenuItem } from "@mui/material";
 import { useEffect, useRef, useState } from "react";
 import { NavLink, Route, Routes, useNavigate } from "react-router-dom";
 
@@ -140,6 +140,11 @@ export default function (): JSX.Element {
                 ref={profileMenuRef}
                 color="inherit"
                 style={{ textTransform: "none" }}
+                startIcon={
+                  <Avatar sx={{ backgroundColor: "transparent" }}>
+                    <Fingerprint sx={{ width: "100%", height: "100%" }} />
+                  </Avatar>
+                }
                 endIcon={<KeyboardArrowDown />}
                 onClick={() => setProfileMenuOpen(true)}
               >

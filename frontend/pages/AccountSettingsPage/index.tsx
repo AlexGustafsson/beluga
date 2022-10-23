@@ -3,8 +3,22 @@ import BreadcrumbSeparator from "../../components/BreadcrumbSeparator";
 import { useSubPage } from "../../utils";
 import GeneralSettingsPage from "./GeneralSettingsPage";
 import SecuritySettingsPage from "./SecuritySettingsPage";
-import { AccessTime, DataUsage, Person } from "@mui/icons-material";
-import { Breadcrumbs, Divider, Stack, SvgIcon, Tab, Tabs } from "@mui/material";
+import {
+  AccessTime,
+  DataUsage,
+  Person,
+  Fingerprint,
+} from "@mui/icons-material";
+import {
+  Breadcrumbs,
+  Divider,
+  Stack,
+  SvgIcon,
+  Tab,
+  Tabs,
+  Avatar,
+  Typography,
+} from "@mui/material";
 import { useEffect, useState } from "react";
 import { Navigate, NavLink, Outlet, Route } from "react-router-dom";
 
@@ -57,31 +71,44 @@ export default function (): JSX.Element {
         </p>
       </Breadcrumbs>
       <Divider orientation="horizontal" />
-      <header className="flex space-x-4">
-        <Stack direction="row" className="p-4 items-center">
-          <SvgIcon
-            component={DataUsage}
-            inheritViewBox
-            sx={{ width: "120px", height: "120px" }}
+      <Stack
+        direction="row"
+        sx={{ padding: "60px 75px" }}
+        spacing="55px"
+        alignItems="center"
+      >
+        <Avatar
+          sx={{
+            width: "80px",
+            height: "80px",
+            backgroundColor: "transparent",
+          }}
+        >
+          <Fingerprint
+            sx={{ width: "100%", height: "100%", color: "#099CEC" }}
           />
-          <Stack className="ml-8" sx={{ color: "#445d6e" }}>
-            <h2 className="text-xl font-semibold">{user?.username}</h2>
-            <Stack
-              direction="row"
-              className="text-xs items-center mt-3"
-              sx={{ color: "#8f9ea8", fill: "#8f9ea8" }}
-            >
-              <Person sx={{ width: "18px", height: "18px" }} />
-              <p className="ml-1">Community User</p>
-              <AccessTime
-                className="ml-4"
-                sx={{ width: "18px", height: "18px" }}
-              />
-              <p className="ml-1">{user?.date_joined}</p>
-            </Stack>
+        </Avatar>
+        <Stack sx={{ color: "#445d6e" }}>
+          <Stack direction="row" alignItems="flex-end" spacing="20px">
+            <Typography variant="h3" fontWeight="medium">
+              {user?.username}
+            </Typography>
+          </Stack>
+          <Stack
+            direction="row"
+            className="text-xs items-center mt-3"
+            sx={{ color: "#8f9ea8", fill: "#8f9ea8" }}
+          >
+            <Person sx={{ width: "18px", height: "18px" }} />
+            <p className="ml-1">Community User</p>
+            <AccessTime
+              className="ml-4"
+              sx={{ width: "18px", height: "18px" }}
+            />
+            <p className="ml-1">{user?.date_joined}</p>
           </Stack>
         </Stack>
-      </header>
+      </Stack>
       <div
         className="flex flex-row grow p-6"
         style={{ backgroundColor: "#f7f7f8" }}

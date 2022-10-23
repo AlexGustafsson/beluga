@@ -1,8 +1,8 @@
 import { useClient, User } from "../../client";
 import { useSubPage } from "../../utils";
 import RepositoriesPage from "./RepositoriesPage";
-import { AccessTime, DataUsage, Person } from "@mui/icons-material";
-import { Divider, Stack, SvgIcon, Tab, Tabs, Typography } from "@mui/material";
+import { AccessTime, Fingerprint, Person } from "@mui/icons-material";
+import { Avatar, Divider, Stack, Tab, Tabs, Typography } from "@mui/material";
 import { Box } from "@mui/system";
 import { useEffect, useState } from "react";
 import { NavLink, Outlet, Route, useParams } from "react-router-dom";
@@ -30,82 +30,94 @@ export default function (): JSX.Element {
   }, []);
 
   return (
-    <div className="flex flex-col grow">
-      <header className="flex space-x-4">
-        <Stack direction="row" className="p-4 items-center">
-          <SvgIcon
-            component={DataUsage}
-            inheritViewBox
-            sx={{ width: "120px", height: "120px" }}
-          />
-          <Stack className="ml-8" sx={{ color: "#445d6e" }}>
-            <Stack direction="row" alignItems="flex-end" spacing="20px">
-              <Typography variant="h3" fontWeight="medium">
-                {username}
-              </Typography>
-              <NavLink to="/settings/general">
-                <Typography variant="body2" className="text-blue-500 underline">
-                  Edit profile
-                </Typography>
-              </NavLink>
-            </Stack>
-            <Stack
-              direction="row"
-              className="text-xs items-center mt-3"
-              sx={{ color: "#8f9ea8", fill: "#8f9ea8" }}
+    <Stack flexGrow="1">
+      <Stack alignItems="center">
+        <Stack sx={{ maxWidth: "960px", width: "100%" }}>
+          <Stack
+            direction="row"
+            sx={{ padding: "60px 0px" }}
+            spacing="55px"
+            alignItems="center"
+          >
+            <Avatar
+              sx={{
+                width: "80px",
+                height: "80px",
+                backgroundColor: "transparent",
+              }}
             >
-              <Person sx={{ width: "18px", height: "18px" }} />
-              <p className="ml-1">Community User</p>
-              <AccessTime
-                className="ml-4"
-                sx={{ width: "18px", height: "18px" }}
+              <Fingerprint
+                sx={{ width: "100%", height: "100%", color: "#099CEC" }}
               />
-              <p className="ml-1">{user?.date_joined}</p>
+            </Avatar>
+            <Stack sx={{ color: "#445d6e" }}>
+              <Stack direction="row" alignItems="flex-end" spacing="20px">
+                <Typography variant="h3" fontWeight="medium">
+                  {username}
+                </Typography>
+                <NavLink to="/settings/general">
+                  <Typography
+                    variant="body2"
+                    className="text-blue-500 underline"
+                  >
+                    Edit profile
+                  </Typography>
+                </NavLink>
+              </Stack>
+              <Stack
+                direction="row"
+                className="text-xs items-center mt-3"
+                sx={{ color: "#8f9ea8", fill: "#8f9ea8" }}
+              >
+                <Person sx={{ width: "18px", height: "18px" }} />
+                <p className="ml-1">Community User</p>
+                <AccessTime
+                  className="ml-4"
+                  sx={{ width: "18px", height: "18px" }}
+                />
+                <p className="ml-1">{user?.date_joined}</p>
+              </Stack>
             </Stack>
           </Stack>
+          <Tabs value={tab}>
+            <Tab
+              component={NavLink}
+              to=""
+              value=""
+              label="Repositories"
+              sx={{ padding: "20px", textTransform: "capitalize" }}
+            />
+            <Tab
+              component={NavLink}
+              to="starred"
+              value="starred"
+              label="Starred"
+              sx={{ padding: "20px", textTransform: "capitalize" }}
+            />
+            <Tab
+              component={NavLink}
+              to="contributed"
+              value="contributed"
+              label="Contributed"
+              sx={{ padding: "20px", textTransform: "capitalize" }}
+            />
+          </Tabs>
         </Stack>
-      </header>
-      <Box
-        sx={{
-          paddingLeft: "24px",
-          paddingRight: "24px",
-        }}
-      >
-        <Tabs value={tab}>
-          <Tab
-            component={NavLink}
-            to=""
-            value=""
-            label="Repositories"
-            sx={{ padding: "20px", textTransform: "capitalize" }}
-          />
-          <Tab
-            component={NavLink}
-            to="starred"
-            value="starred"
-            label="Starred"
-            sx={{ padding: "20px", textTransform: "capitalize" }}
-          />
-          <Tab
-            component={NavLink}
-            to="contributed"
-            value="contributed"
-            label="Contributed"
-            sx={{ padding: "20px", textTransform: "capitalize" }}
-          />
-        </Tabs>
-      </Box>
+      </Stack>
       <Divider />
-      <Box
+      <Stack
         sx={{
           padding: "12px",
           paddingTop: "24px",
           backgroundColor: "#f7f7f8",
-          flexGrow: 1,
+          alignItems: "center",
+          flexGrow: "1",
         }}
       >
-        <Outlet />
-      </Box>
-    </div>
+        <Box sx={{ maxWidth: "960px", width: "100%" }}>
+          <Outlet />
+        </Box>
+      </Stack>
+    </Stack>
   );
 }
