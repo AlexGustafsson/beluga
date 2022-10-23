@@ -3,20 +3,31 @@ import {
   ClickAwayListener,
   IconButton,
   InputAdornment,
+  InputProps,
   SxProps,
   TextField,
   Theme,
   Tooltip,
+  TooltipProps,
 } from "@mui/material";
 import { useState } from "react";
 
 export interface Props {
   value: string;
+  tooltipTitle: string;
+  tooltipPlacement: Pick<TooltipProps, "placement">;
   sx?: SxProps<Theme> & React.CSSProperties;
+  InputProps: InputProps;
 }
 
 /** A copyable TextField implementation. */
-export default function ({ value, sx }: Props): JSX.Element {
+export default function ({
+  value,
+  tooltipTitle,
+  tooltipPlacement,
+  sx,
+  InputProps,
+}: Props): JSX.Element {
   const [copied, setCopied] = useState<boolean>(false);
 
   async function copy() {
@@ -28,9 +39,9 @@ export default function ({ value, sx }: Props): JSX.Element {
     <ClickAwayListener onClickAway={() => setCopied(false)}>
       <Tooltip
         arrow
-        placement="top"
+        placement={tooltipPlacement}
         open={copied}
-        title="Pull command copied"
+        title={tooltipTitle}
         disableFocusListener
         disableHoverListener
         disableTouchListener
@@ -46,23 +57,14 @@ export default function ({ value, sx }: Props): JSX.Element {
             ...sx,
           }}
           InputProps={{
+            ...InputProps,
             readOnly: true,
-
             disableUnderline: true,
-            style: {
-              color: sx?.color,
-              fontWeight: 600,
-              fontSize: "14px",
-              paddingTop: "8px",
-              paddingBottom: "8px",
-              paddingLeft: "12px",
-              paddingRight: "0px",
-            },
             endAdornment: (
               <InputAdornment position="end">
                 <IconButton onClick={copy}>
                   <ContentCopyOutlined
-                    sx={{ color: sx?.color }}
+                    sx={{ color: InputProps?.style?.color ?? "inherit" }}
                     fontSize="small"
                   />
                 </IconButton>

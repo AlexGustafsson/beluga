@@ -173,7 +173,20 @@ function AccessTokenPopup({ open, onClose }: ModalProps): JSX.Element {
       </Typography>
       <TextFieldCopy
         value={token.token!}
-        sx={{ marginTop: "22px", backgroundColor: "#27343B", color: "white" }}
+        tooltipTitle="Copied!"
+        tooltipPlacement="top"
+        sx={{ marginTop: "22px", backgroundColor: "#27343B" }}
+        InputProps={{
+          style: {
+            color: "white",
+            fontSize: "14px",
+            paddingTop: "8px",
+            paddingBottom: "8px",
+            paddingLeft: "12px",
+            paddingRight: "0px",
+            fontWeight: 600,
+          },
+        }}
       />
       <Button
         variant="contained"

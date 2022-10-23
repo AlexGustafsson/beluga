@@ -56,7 +56,20 @@ export default function (): JSX.Element {
         </Typography>
         <TextFieldCopy
           value={`docker pull ${repository?.namespace}/${repository?.name}`}
-          sx={{ color: "white", backgroundColor: "#27343B" }}
+          tooltipTitle="Pull command copied"
+          tooltipPlacement="top"
+          sx={{ backgroundColor: "#27343B" }}
+          InputProps={{
+            style: {
+              color: "white",
+              fontSize: "14px",
+              paddingTop: "8px",
+              paddingBottom: "8px",
+              paddingLeft: "12px",
+              paddingRight: "0px",
+              fontWeight: 600,
+            },
+          }}
         ></TextFieldCopy>
       </Card>
     </Box>
