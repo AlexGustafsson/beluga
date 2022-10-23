@@ -11,6 +11,8 @@ import {
   Fade,
   FormControl,
   FormHelperText,
+  FormControlLabel,
+  Switch,
   IconButton,
   InputLabel,
   MenuItem,
@@ -222,8 +224,131 @@ function AccessTokenPopup({ open, onClose }: ModalProps): JSX.Element {
   );
 }
 
+function AccessTokenInfoModal({ open, onClose }: ModalProps): JSX.Element {
+  return (
+    <Modal
+      aria-labelledby="transition-modal-title"
+      aria-describedby="transition-modal-description"
+      open={open}
+      onClose={onClose}
+      closeAfterTransition
+      BackdropComponent={Backdrop}
+      BackdropProps={{
+        timeout: 500,
+      }}
+    >
+      <Fade in={open}>
+        <Box className="flex items-center justify-center absolute w-full h-full">
+          <Card className="p-6 flex flex-col" sx={{ maxWidth: "740px" }}>
+            <Typography variant="h2">Edit Access Token</Typography>
+            <Typography variant="body1">
+              Personal access tokens are linked to your Beluga account and can
+              be used in place of a password.
+            </Typography>
+            <TextField
+              required
+              variant="standard"
+              label="Access Token Description"
+              sx={{ marginTop: "35px" }}
+            />
+            <Typography variant="body1" sx={{ marginTop: "22px" }}>
+              Scope
+            </Typography>
+            <Typography variant="body1" sx={{ marginTop: "6px" }}>
+              Read, Write, Delete
+            </Typography>
+            <Box
+              display="grid"
+              gridTemplateColumns="35% 50%"
+              gap="24px"
+              margin="24px 0"
+            >
+              <Stack>
+                <Typography
+                  variant="body1"
+                  sx={{ textTransform: "uppercase", tmarginTop: "22px" }}
+                >
+                  Created On
+                </Typography>
+                <Typography
+                  variant="body1"
+                  fontWeight="bold"
+                  sx={{ marginTop: "6px" }}
+                >
+                  Oct 23, 2022 13:00:15
+                </Typography>
+              </Stack>
+              <Stack>
+                <Typography
+                  variant="body1"
+                  sx={{ textTransform: "uppercase", tmarginTop: "22px" }}
+                >
+                  Creator User Agent
+                </Typography>
+                <Typography
+                  variant="body1"
+                  fontWeight="bold"
+                  sx={{ marginTop: "6px" }}
+                >
+                  Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)
+                  AppleWebKit/605.1.15 (KHTML, like Gecko) Version/14.1
+                  Safari/605.1.15
+                </Typography>
+              </Stack>
+              <Stack>
+                <Typography
+                  variant="body1"
+                  sx={{ textTransform: "uppercase", tmarginTop: "22px" }}
+                >
+                  Last Used
+                </Typography>
+                <Typography
+                  variant="body1"
+                  fontWeight="bold"
+                  sx={{ marginTop: "6px" }}
+                >
+                  Never
+                </Typography>
+              </Stack>
+              <FormControlLabel
+                control={<Switch defaultChecked />}
+                label="Active"
+              />
+              <Stack>
+                <Typography
+                  variant="body1"
+                  sx={{ textTransform: "uppercase", tmarginTop: "22px" }}
+                >
+                  Generated
+                </Typography>
+                <Typography
+                  variant="body1"
+                  fontWeight="bold"
+                  sx={{ marginTop: "6px" }}
+                >
+                  By user via Web UI
+                </Typography>
+              </Stack>
+            </Box>
+            <Stack direction="row" justifyContent="space-between">
+              <Button variant="outlined" color="error">
+                Delete
+              </Button>
+              <Stack direction="row" spacing="12px">
+                <Button onClick={() => onClose({}, "canceled")}>Cancel</Button>
+                <Button variant="contained">Save</Button>
+              </Stack>
+            </Stack>
+          </Card>
+        </Box>
+      </Fade>
+    </Modal>
+  );
+}
+
 export default function (): JSX.Element {
   const [tokenModalOpen, setTokenModalOpen] = useState<boolean>(false);
+  const [tokenInfoModalOpen, setTokenInfoModalOpen] = useState<boolean>(false);
   const [tokens, setTokens] = useState<Token[]>([]);
   const [selectedTokens, setSelectedTokens] = useState<string[]>([]);
 
@@ -367,7 +492,7 @@ export default function (): JSX.Element {
                     {token.is_active ? "Yes" : "No"}
                   </TableCell>
                   <TableCell>
-                    <IconButton>
+                    <IconButton onClick={() => setTokenInfoModalOpen(true)}>
                       <MoreVert />
                     </IconButton>
                   </TableCell>
@@ -380,6 +505,10 @@ export default function (): JSX.Element {
       <AccessTokenPopup
         open={tokenModalOpen}
         onClose={() => setTokenModalOpen(false)}
+      />
+      <AccessTokenInfoModal
+        open={tokenInfoModalOpen}
+        onClose={() => setTokenInfoModalOpen(false)}
       />
     </Card>
   );
