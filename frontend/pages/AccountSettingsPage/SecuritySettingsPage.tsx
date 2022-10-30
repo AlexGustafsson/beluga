@@ -168,7 +168,7 @@ function AccessTokenPopup({ open, onClose }: ModalProps): JSX.Element {
         value={token.token!}
         tooltipTitle="Copied!"
         tooltipPlacement="top"
-        sx={{ marginTop: "22px", backgroundColor: "#27343B" }}
+        sx={{ marginTop: "22px" }}
         InputProps={{
           style: {
             color: "white",
@@ -178,6 +178,7 @@ function AccessTokenPopup({ open, onClose }: ModalProps): JSX.Element {
             paddingLeft: "12px",
             paddingRight: "0px",
             fontWeight: 600,
+            backgroundColor: "#27343B",
           },
         }}
       />

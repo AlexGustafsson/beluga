@@ -63,10 +63,11 @@ export default function ({
             value={`docker pull ${namespace}/${repositoryName}:${value.name}`}
             tooltipTitle="Pull command copied"
             tooltipPlacement="top"
-            sx={{ backgroundColor: "#efeff2", padding: "0px" }}
+            sx={{ padding: "0px" }}
             InputProps={{
-              style: {
+              sx: {
                 padding: "0px 5px",
+                backgroundColor: "#efeff2",
               },
             }}
           />

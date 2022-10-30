@@ -69,7 +69,6 @@ export default function (): JSX.Element {
         <TextField
           size="small"
           variant="outlined"
-          sx={{ backgroundColor: "#fbfbfc" }}
           InputProps={{
             placeholder: "Search by repository name",
             startAdornment: (
@@ -84,7 +83,7 @@ export default function (): JSX.Element {
                 </IconButton>
               </InputAdornment>
             ),
-            style: { fontSize: "12px" },
+            sx: { fontSize: "12px", backgroundColor: "#fbfbfc" },
           }}
         />
         <NavLink to={`/repository/create?namespace=${namespace}`}>

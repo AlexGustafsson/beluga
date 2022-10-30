@@ -64,7 +64,6 @@ export default function (): JSX.Element {
         <TextField
           size="small"
           variant="outlined"
-          sx={{ backgroundColor: "#fbfbfc" }}
           InputProps={{
             placeholder: "Filter Tags",
             startAdornment: (
@@ -79,7 +78,7 @@ export default function (): JSX.Element {
                 </IconButton>
               </InputAdornment>
             ),
-            style: { fontSize: "12px" },
+            sx: { fontSize: "12px", backgroundColor: "#fbfbfc" },
           }}
         />
       </header>

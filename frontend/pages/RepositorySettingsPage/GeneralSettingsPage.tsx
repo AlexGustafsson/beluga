@@ -175,9 +175,13 @@ function RepositoryCard({
             To push a new tag to this repository,
           </Typography>
           <TextField
-            sx={{ backgroundColor: "#445E6E", marginTop: "15px" }}
+            sx={{ marginTop: "15px" }}
             InputProps={{
-              sx: { color: "white", fontWeight: 500 },
+              sx: {
+                color: "white",
+                fontWeight: 500,
+                backgroundColor: "#445E6E",
+              },
               readOnly: true,
             }}
             value={`docker push ${repository.namespace}/${repository.name}:tagname`}
