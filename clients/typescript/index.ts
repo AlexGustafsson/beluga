@@ -32,6 +32,7 @@ export type { TagPage } from './models/TagPage';
 export type { Token } from './models/Token';
 export type { TokenPage } from './models/TokenPage';
 export type { TokenRequest } from './models/TokenRequest';
+export type { TokenUpdate } from './models/TokenUpdate';
 export type { User } from './models/User';
 export type { UserUpdate } from './models/UserUpdate';
 

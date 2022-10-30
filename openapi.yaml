@@ -721,6 +721,39 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Error"
+  /v2/access-tokens/{token}:
+    parameters:
+      - in: path
+        name: token
+        required: true
+        schema:
+          type: string
+    patch:
+      operationId: patch-access-token
+      summary: Patch access token
+      description: Patch access token
+      tags:
+        - Tokens
+      requestBody:
+        description: Tokens update
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TokenUpdate"
+      responses:
+        "200":
+          description: Token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Token"
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
 
 components:
   schemas:
@@ -1288,6 +1321,13 @@ components:
           type: array
           items:
             type: string
+    TokenUpdate:
+      type: object
+      properties:
+        is_active:
+          type: boolean
+        token_label:
+          type: string
     TokenPage:
       allOf:
         - $ref: "#/components/schemas/Page"

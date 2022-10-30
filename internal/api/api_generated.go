@@ -338,6 +338,12 @@ type TokenRequest struct {
 	TokenLabel string   `json:"token_label"`
 }
 
+// TokenUpdate defines model for TokenUpdate.
+type TokenUpdate struct {
+	IsActive   *bool   `json:"is_active,omitempty"`
+	TokenLabel *string `json:"token_label,omitempty"`
+}
+
 // User defines model for User.
 type User struct {
 	Company       string    `json:"company"`
@@ -426,6 +432,12 @@ type GetTagsParams struct {
 
 	// Name Prefix of label names to match against
 	Name *string `form:"name,omitempty" json:"name,omitempty"`
+
+	// PageSize Page size
+	PageSize *int `form:"page_size,omitempty" json:"page_size,omitempty"`
+
+	// Page Page index
+	Page *int `form:"page,omitempty" json:"page,omitempty"`
 }
 
 // GetTagsParamsOrdering defines parameters for GetTags.
@@ -464,6 +476,9 @@ type GetUserStarredParamsOrdering string
 // CreateAccessTokenJSONRequestBody defines body for CreateAccessToken for application/json ContentType.
 type CreateAccessTokenJSONRequestBody = TokenRequest
 
+// PatchAccessTokenJSONRequestBody defines body for PatchAccessToken for application/json ContentType.
+type PatchAccessTokenJSONRequestBody = TokenUpdate
+
 // PostRepositoriesJSONRequestBody defines body for PostRepositories for application/json ContentType.
 type PostRepositoriesJSONRequestBody = CreateRepositoryRequest
 
@@ -484,6 +499,9 @@ type ServerInterface interface {
 	// Create an access token
 	// (POST /v2/access-tokens)
 	CreateAccessToken(w http.ResponseWriter, r *http.Request) (*Token, *Error)
+	// Patch access token
+	// (PATCH /v2/access-tokens/{token})
+	PatchAccessToken(w http.ResponseWriter, r *http.Request, token string) (*Token, *Error)
 	// Fetch organizations
 	// (GET /v2/orgs)
 	GetOrganizations(w http.ResponseWriter, r *http.Request, params GetOrganizationsParams) (*OrganizationsPage, *Error)
@@ -666,6 +684,41 @@ func (siw *ServerInterfaceWrapper) CreateAccessToken(w http.ResponseWriter, r *h
 
 	var handler = func(w http.ResponseWriter, r *http.Request) {
 		res, err := siw.Handler.CreateAccessToken(w, r)
+		if err != nil {
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(err.Status)
+			json.NewEncoder(w).Encode(err)
+			return
+		}
+
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(res)
+	}
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler(w, r.WithContext(ctx))
+}
+
+// PatchAccessToken operation middleware
+func (siw *ServerInterfaceWrapper) PatchAccessToken(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	var err error
+
+	// ------------- Path parameter "token" -------------
+	var token string
+
+	err = runtime.BindStyledParameter("simple", false, "token", mux.Vars(r)["token"], &token)
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "token", Err: err})
+		return
+	}
+
+	var handler = func(w http.ResponseWriter, r *http.Request) {
+		res, err := siw.Handler.PatchAccessToken(w, r, token)
 		if err != nil {
 			w.Header().Set("Content-Type", "application/json")
 			w.WriteHeader(err.Status)
@@ -1071,6 +1124,22 @@ func (siw *ServerInterfaceWrapper) GetTags(w http.ResponseWriter, r *http.Reques
 	err = runtime.BindQueryParameter("form", true, false, "name", r.URL.Query(), &params.Name)
 	if err != nil {
 		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "name", Err: err})
+		return
+	}
+
+	// ------------- Optional query parameter "page_size" -------------
+
+	err = runtime.BindQueryParameter("form", true, false, "page_size", r.URL.Query(), &params.PageSize)
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "page_size", Err: err})
+		return
+	}
+
+	// ------------- Optional query parameter "page" -------------
+
+	err = runtime.BindQueryParameter("form", true, false, "page", r.URL.Query(), &params.Page)
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "page", Err: err})
 		return
 	}
 
@@ -1525,6 +1594,8 @@ func HandlerWithOptions(si ServerInterface, options GorillaServerOptions) http.H
 	r.HandleFunc(options.BaseURL+"/v2/access-tokens", wrapper.GetAccessTokens).Methods("GET")
 
 	r.HandleFunc(options.BaseURL+"/v2/access-tokens", wrapper.CreateAccessToken).Methods("POST")
+
+	r.HandleFunc(options.BaseURL+"/v2/access-tokens/{token}", wrapper.PatchAccessToken).Methods("PATCH")
 
 	r.HandleFunc(options.BaseURL+"/v2/orgs", wrapper.GetOrganizations).Methods("GET")
 

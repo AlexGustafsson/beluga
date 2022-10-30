@@ -534,6 +534,14 @@ func (a *API) CreateAccessToken(w http.ResponseWriter, r *http.Request) (*Token,
 	return result, nil
 }
 
+func (a *API) PatchAccessToken(w http.ResponseWriter, r *http.Request, tokenID string) (*Token, *Error) {
+	result := &Token{
+		TokenLabel: "test-token",
+		Scopes:     []string{"repo:admin"},
+	}
+	return result, nil
+}
+
 func (a *API) GetAccessTokens(w http.ResponseWriter, r *http.Request) (*TokenPage, *Error) {
 	result := &TokenPage{
 		Page:        Page{},
