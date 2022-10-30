@@ -526,6 +526,12 @@ type ServerInterface interface {
 	// Fetch dockerfile
 	// (GET /v2/repositories/{namespace}/{repository}/dockerfile)
 	GetDockerfile(w http.ResponseWriter, r *http.Request, namespace string, repository string) (*Dockerfile, *Error)
+	// Unstar repository
+	// (DELETE /v2/repositories/{namespace}/{repository}/stars)
+	UnstarRepository(w http.ResponseWriter, r *http.Request, namespace string, repository string) *Error
+	// Star repository
+	// (POST /v2/repositories/{namespace}/{repository}/stars)
+	StarRepository(w http.ResponseWriter, r *http.Request, namespace string, repository string) *Error
 	// List repositories in a namespace
 	// (GET /v2/repositories/{namespace}/{repository}/tags)
 	GetTags(w http.ResponseWriter, r *http.Request, namespace string, repository string, params GetTagsParams) (*TagPage, *Error)
@@ -1084,6 +1090,88 @@ func (siw *ServerInterfaceWrapper) GetDockerfile(w http.ResponseWriter, r *http.
 	handler(w, r.WithContext(ctx))
 }
 
+// UnstarRepository operation middleware
+func (siw *ServerInterfaceWrapper) UnstarRepository(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	var err error
+
+	// ------------- Path parameter "namespace" -------------
+	var namespace string
+
+	err = runtime.BindStyledParameter("simple", false, "namespace", mux.Vars(r)["namespace"], &namespace)
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "namespace", Err: err})
+		return
+	}
+
+	// ------------- Path parameter "repository" -------------
+	var repository string
+
+	err = runtime.BindStyledParameter("simple", false, "repository", mux.Vars(r)["repository"], &repository)
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "repository", Err: err})
+		return
+	}
+
+	var handler = func(w http.ResponseWriter, r *http.Request) {
+		err := siw.Handler.UnstarRepository(w, r, namespace, repository)
+		if err != nil {
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(err.Status)
+			json.NewEncoder(w).Encode(err)
+			return
+		}
+	}
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler(w, r.WithContext(ctx))
+}
+
+// StarRepository operation middleware
+func (siw *ServerInterfaceWrapper) StarRepository(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	var err error
+
+	// ------------- Path parameter "namespace" -------------
+	var namespace string
+
+	err = runtime.BindStyledParameter("simple", false, "namespace", mux.Vars(r)["namespace"], &namespace)
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "namespace", Err: err})
+		return
+	}
+
+	// ------------- Path parameter "repository" -------------
+	var repository string
+
+	err = runtime.BindStyledParameter("simple", false, "repository", mux.Vars(r)["repository"], &repository)
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "repository", Err: err})
+		return
+	}
+
+	var handler = func(w http.ResponseWriter, r *http.Request) {
+		err := siw.Handler.StarRepository(w, r, namespace, repository)
+		if err != nil {
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(err.Status)
+			json.NewEncoder(w).Encode(err)
+			return
+		}
+	}
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler(w, r.WithContext(ctx))
+}
+
 // GetTags operation middleware
 func (siw *ServerInterfaceWrapper) GetTags(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
@@ -1612,6 +1700,10 @@ func HandlerWithOptions(si ServerInterface, options GorillaServerOptions) http.H
 	r.HandleFunc(options.BaseURL+"/v2/repositories/{namespace}/{repository}", wrapper.PatchRepository).Methods("PATCH")
 
 	r.HandleFunc(options.BaseURL+"/v2/repositories/{namespace}/{repository}/dockerfile", wrapper.GetDockerfile).Methods("GET")
+
+	r.HandleFunc(options.BaseURL+"/v2/repositories/{namespace}/{repository}/stars", wrapper.UnstarRepository).Methods("DELETE")
+
+	r.HandleFunc(options.BaseURL+"/v2/repositories/{namespace}/{repository}/stars", wrapper.StarRepository).Methods("POST")
 
 	r.HandleFunc(options.BaseURL+"/v2/repositories/{namespace}/{repository}/tags", wrapper.GetTags).Methods("GET")
 

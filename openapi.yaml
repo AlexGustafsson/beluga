@@ -443,6 +443,51 @@ paths:
               schema:
                 $ref: "#/components/schemas/Error"
 
+  /v2/repositories/{namespace}/{repository}/stars:
+    parameters:
+      - in: path
+        name: namespace
+        description: User or organization
+        required: true
+        schema:
+          type: string
+      - in: path
+        name: repository
+        description: Name of the repository
+        required: true
+        schema:
+          type: string
+    post:
+      operationId: star-repository
+      summary: Star repository
+      description: Star repository
+      tags:
+        - Repositories
+      responses:
+        "204":
+          description: No Content
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+    delete:
+      operationId: unstar-repository
+      summary: Unstar repository
+      description: Unstar repository
+      tags:
+        - Repositories
+      responses:
+        "204":
+          description: No Content
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
   /v2/orgs:
     get:
       operationId: get-organizations

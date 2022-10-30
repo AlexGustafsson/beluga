@@ -271,4 +271,54 @@ export class RepositoriesService {
     });
   }
 
+  /**
+   * Star repository
+   * Star repository
+   * @param namespace User or organization
+   * @param repository Name of the repository
+   * @returns void
+   * @throws ApiError
+   */
+  public starRepository(
+    namespace: string,
+    repository: string,
+  ): CancelablePromise<void> {
+    return this.httpRequest.request({
+      method: 'POST',
+      url: '/v2/repositories/{namespace}/{repository}/stars',
+      path: {
+        'namespace': namespace,
+        'repository': repository,
+      },
+      errors: {
+        500: `Internal server error`,
+      },
+    });
+  }
+
+  /**
+   * Unstar repository
+   * Unstar repository
+   * @param namespace User or organization
+   * @param repository Name of the repository
+   * @returns void
+   * @throws ApiError
+   */
+  public unstarRepository(
+    namespace: string,
+    repository: string,
+  ): CancelablePromise<void> {
+    return this.httpRequest.request({
+      method: 'DELETE',
+      url: '/v2/repositories/{namespace}/{repository}/stars',
+      path: {
+        'namespace': namespace,
+        'repository': repository,
+      },
+      errors: {
+        500: `Internal server error`,
+      },
+    });
+  }
+
 }

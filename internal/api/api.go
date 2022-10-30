@@ -374,6 +374,16 @@ func (a *API) PostRepositories(w http.ResponseWriter, r *http.Request) (*Reposit
 	return &repository, nil
 }
 
+func (a *API) StarRepository(w http.ResponseWriter, r *http.Request, namespace string, repository string) *Error {
+	w.WriteHeader(http.StatusNoContent)
+	return nil
+}
+
+func (a *API) UnstarRepository(w http.ResponseWriter, r *http.Request, namespace string, repository string) *Error {
+	w.WriteHeader(http.StatusNoContent)
+	return nil
+}
+
 func (a *API) GetCurrentUser(w http.ResponseWriter, r *http.Request) (*User, *Error) {
 	result := &User{
 		Company:    "test",

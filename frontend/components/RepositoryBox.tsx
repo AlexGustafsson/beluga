@@ -1,9 +1,10 @@
 import { RepositoryWithDetails } from "../client";
-import { DataUsage } from "@mui/icons-material";
+import { DataUsage, Star, StarOutline } from "@mui/icons-material";
 import {
   Box,
   Button,
   Chip,
+  IconButton,
   Stack,
   SvgIcon,
   SxProps,
@@ -15,9 +16,10 @@ import { NavLink } from "react-router-dom";
 export interface Props {
   sx?: SxProps<Theme>;
   value: RepositoryWithDetails;
+  onStarredChange?: (starred: boolean) => void;
 }
 
-export default function ({ sx, value }: Props): JSX.Element {
+export default function ({ sx, value, onStarredChange }: Props): JSX.Element {
   return (
     <Box sx={{ padding: "24px", ...sx }}>
       <Stack direction="row" spacing={2}>
@@ -27,9 +29,24 @@ export default function ({ sx, value }: Props): JSX.Element {
           sx={{ width: "120px", height: "120px" }}
         />
         <Stack direction="column" sx={{ flexGrow: 1 }}>
-          <Typography variant="h5" component="p">
-            {value.namespace}/{value.name}
-          </Typography>
+          <Stack direction="row" alignItems="center" spacing="5px">
+            <Typography variant="h5" component="p">
+              {value.namespace}/{value.name}
+            </Typography>
+            <IconButton
+              onClick={
+                onStarredChange
+                  ? () => onStarredChange(!value.has_starred)
+                  : undefined
+              }
+            >
+              {value.has_starred ? (
+                <Star fontSize="inherit" />
+              ) : (
+                <StarOutline fontSize="inherit" />
+              )}
+            </IconButton>
+          </Stack>
           <Typography variant="body2" component="p">
             By{" "}
             <NavLink

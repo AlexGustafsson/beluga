@@ -6,7 +6,7 @@ import OverviewPage from "./OverviewPage";
 import TagsPage from "./TagsPage";
 import { Breadcrumbs, Divider, Tab, Tabs } from "@mui/material";
 import { Box } from "@mui/system";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { NavLink, Outlet, Route, useParams } from "react-router-dom";
 
 export const subPages = [
@@ -26,6 +26,17 @@ export default function (): JSX.Element {
       .getRepository("_", "nginx")
       .then((x) => setRepository(x));
   }, []);
+
+  const toggleStarred = useCallback(
+    (starred: boolean) => {
+      if (starred) {
+        client.repositories.unstarRepository(namespace!, repositoryName);
+      } else {
+        client.repositories.starRepository(namespace!, repositoryName);
+      }
+    },
+    [client, repository]
+  );
 
   return (
     <div className="flex flex-col grow">
@@ -48,7 +59,11 @@ export default function (): JSX.Element {
       <Divider orientation="horizontal" />
       <header className="flex space-x-4">
         {repository ? (
-          <RepositoryBox value={repository} sx={{ width: "100%" }} />
+          <RepositoryBox
+            value={repository}
+            sx={{ width: "100%" }}
+            onStarredChange={toggleStarred}
+          />
         ) : null}
       </header>
       <Box
