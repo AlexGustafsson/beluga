@@ -131,7 +131,6 @@ export default function (): JSX.Element {
               label="General"
               sx={{
                 alignItems: "flex-start",
-                textTransform: "none",
               }}
             />
             <Tab
@@ -141,7 +140,6 @@ export default function (): JSX.Element {
               label="Security"
               sx={{
                 alignItems: "flex-start",
-                textTransform: "none",
               }}
             />
           </Tabs>

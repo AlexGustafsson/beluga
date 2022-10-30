@@ -12,9 +12,7 @@ export default function (): JSX.Element {
             Collaborate on projects with your team
           </h2>
           <p>Bring your developers ...</p>
-          <Button variant="contained" sx={{ textTransform: "none" }}>
-            Create Organization
-          </Button>
+          <Button variant="contained">Create Organization</Button>
         </div>
       </main>
     </div>

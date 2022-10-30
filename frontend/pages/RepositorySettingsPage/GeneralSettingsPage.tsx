@@ -36,8 +36,8 @@ function ReadmeEditor({
   return (
     <Stack sx={sx} className="border-solid border-2">
       <Tabs value={tab} onChange={(_, tab) => setTab(tab)}>
-        <Tab value="write" label="Write" sx={{ textTransform: "none" }} />
-        <Tab value="preview" label="Preview" sx={{ textTransform: "none" }} />
+        <Tab value="write" label="Write" />
+        <Tab value="preview" label="Preview" />
       </Tabs>
       <Divider />
       {/* TODO: Likely more efficient to just hide preview when not active */}

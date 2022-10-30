@@ -88,11 +88,7 @@ export default function (): JSX.Element {
           }}
         />
         <NavLink to={`/repository/create?namespace=${namespace}`}>
-          <Button
-            variant="contained"
-            style={{ textTransform: "none" }}
-            className="self-end"
-          >
+          <Button variant="contained" className="self-end">
             Create repository
           </Button>
         </NavLink>

@@ -107,7 +107,6 @@ export default function () {
         <Button
           variant="outlined"
           color="error"
-          sx={{ textTransform: "none" }}
           disabled={selectedTags.length === 0}
         >
           Delete

@@ -220,20 +220,11 @@ export default function (): JSX.Element {
           </FormControl>
           <div className="flex space-x-4 justify-end">
             <NavLink to="/repositories">
-              <Button
-                variant="outlined"
-                color="error"
-                style={{ textTransform: "none" }}
-              >
+              <Button variant="outlined" color="error">
                 Cancel
               </Button>
             </NavLink>
-            <Button
-              disabled={!canCreate}
-              variant="contained"
-              style={{ textTransform: "none" }}
-              onClick={submit}
-            >
+            <Button disabled={!canCreate} variant="contained" onClick={submit}>
               Create
             </Button>
           </div>

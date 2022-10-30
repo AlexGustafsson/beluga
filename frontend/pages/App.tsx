@@ -112,34 +112,25 @@ export default function (): JSX.Element {
       >
         <div className="flex items-center space-x-4">
           <NavLink to="/">
-            <Button color="inherit" style={{ textTransform: "none" }}>
-              Beluga
-            </Button>
+            <Button color="inherit">Beluga</Button>
           </NavLink>
           {searchElement}
         </div>
         <div className="flex items-center space-x-4">
           <NavLink to="/explore">
-            <Button color="inherit" style={{ textTransform: "none" }}>
-              Explore
-            </Button>
+            <Button color="inherit">Explore</Button>
           </NavLink>
           {isAuthenticated ? (
             <>
               <NavLink to="/repositories">
-                <Button color="inherit" style={{ textTransform: "none" }}>
-                  Repositories
-                </Button>
+                <Button color="inherit">Repositories</Button>
               </NavLink>
               <NavLink to="/orgs">
-                <Button color="inherit" style={{ textTransform: "none" }}>
-                  Organizations
-                </Button>
+                <Button color="inherit">Organizations</Button>
               </NavLink>
               <Button
                 ref={profileMenuRef}
                 color="inherit"
-                style={{ textTransform: "none" }}
                 startIcon={
                   <Avatar sx={{ backgroundColor: "transparent" }}>
                     <Fingerprint sx={{ width: "100%", height: "100%" }} />
@@ -177,11 +168,7 @@ export default function (): JSX.Element {
               </Menu>
             </>
           ) : (
-            <Button
-              color="inherit"
-              style={{ textTransform: "none" }}
-              onClick={() => loginWithRedirect()}
-            >
+            <Button color="inherit" onClick={() => loginWithRedirect()}>
               Sign In
             </Button>
           )}

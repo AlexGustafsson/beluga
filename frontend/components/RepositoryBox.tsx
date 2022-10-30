@@ -58,9 +58,7 @@ export default function ({ sx, value }: Props): JSX.Element {
         <Stack>
           <NavLink to={`/repository/docker/${value.namespace}/${value.name}`}>
             {value.affiliation === "owner" && (
-              <Button variant="outlined" sx={{ textTransform: "none" }}>
-                Manage Repository
-              </Button>
+              <Button variant="outlined">Manage Repository</Button>
             )}
           </NavLink>
           <Stack direction="row" spacing={1} className="mt-3 self-end">

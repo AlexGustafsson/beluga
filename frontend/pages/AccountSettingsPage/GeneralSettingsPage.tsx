@@ -75,7 +75,6 @@ export default function (): JSX.Element {
       <Button
         variant="contained"
         className="self-start"
-        sx={{ textTransform: "none" }}
         onClick={submit}
         disabled={isSubmitting}
       >

@@ -124,17 +124,8 @@ function AccessTokenPopup({ open, onClose }: ModalProps): JSX.Element {
       </FormControl>
 
       <Stack direction="row" className="self-end mt-6 space-x-6">
-        <Button
-          sx={{ textTransform: "none" }}
-          onClick={() => onClose({}, "canceled")}
-        >
-          Cancel
-        </Button>
-        <Button
-          variant="contained"
-          sx={{ textTransform: "none" }}
-          onClick={generate}
-        >
+        <Button onClick={() => onClose({}, "canceled")}>Cancel</Button>
+        <Button variant="contained" onClick={generate}>
           Generate
         </Button>
       </Stack>
@@ -192,7 +183,7 @@ function AccessTokenPopup({ open, onClose }: ModalProps): JSX.Element {
       />
       <Button
         variant="contained"
-        sx={{ textTransform: "none", marginTop: "32px" }}
+        sx={{ marginTop: "32px" }}
         className="self-end"
         onClick={copyAndClose}
       >
@@ -363,6 +354,8 @@ export default function (): JSX.Element {
   // TODO: On delete, show delete modal
   // TODO: On edit, show edit modal
   // TODO: On "more" button, show edit modal
+  // TODO: Rewrite modal. There must be a better way.
+  // Not easily maintainable currently. One packdrop, then switch the modal presented within in some way?
   return (
     <Card className="flex flex-col w-full space-y-6">
       <Stack direction="row" className="justify-between items-center">
@@ -372,25 +365,18 @@ export default function (): JSX.Element {
             {selectedTokens.length === 0 && (
               <Button
                 variant="contained"
-                sx={{ textTransform: "none" }}
                 onClick={() => setTokenModalOpen(true)}
               >
                 New Access Token
               </Button>
             )}
             {selectedTokens.length > 0 && (
-              <Button
-                variant="outlined"
-                sx={{ textTransform: "none" }}
-                color="error"
-              >
+              <Button variant="outlined" color="error">
                 Delete
               </Button>
             )}
             {selectedTokens.length === 1 && (
-              <Button variant="outlined" sx={{ textTransform: "none" }}>
-                Edit
-              </Button>
+              <Button variant="outlined">Edit</Button>
             )}
           </Stack>
         )}
@@ -411,7 +397,7 @@ export default function (): JSX.Element {
           </Typography>
           <Button
             variant="contained"
-            sx={{ marginTop: "12px", textTransform: "none" }}
+            sx={{ marginTop: "12px" }}
             onClick={() => setTokenModalOpen(true)}
           >
             New Access Token

@@ -69,7 +69,6 @@ function ConfirmDeletePopup({
               />
               <Stack direction="row" className="self-end space-x-6">
                 <Button
-                  sx={{ textTransform: "none" }}
                   variant="outlined"
                   onClick={() => onClose({}, "canceled")}
                 >
@@ -79,7 +78,6 @@ function ConfirmDeletePopup({
                   disabled={confirmedName !== repositoryName}
                   variant="contained"
                   color="error"
-                  sx={{ textTransform: "none" }}
                   onClick={() => onClose({}, "confirmed")}
                 >
                   Delete
@@ -128,7 +126,7 @@ export default function () {
           <Button
             variant="outlined"
             color="error"
-            sx={{ marginTop: "20px", textTransform: "none" }}
+            sx={{ marginTop: "20px" }}
             onClick={() => setDeletePopupOpen(true)}
           >
             Delete repository
