@@ -1,6 +1,6 @@
 import { RepositoryWithDetails, useClient } from "../../client";
 import "../../styles/markdown.css";
-import { Edit, Schedule } from "@mui/icons-material";
+import { Edit, Lock, Public, Schedule } from "@mui/icons-material";
 import {
   Button,
   Card,
@@ -8,15 +8,18 @@ import {
   IconButton,
   Link,
   Stack,
+  SvgIcon,
   SxProps,
   Tab,
   Tabs,
+  TextField,
   Theme,
   Typography,
 } from "@mui/material";
+import { Box } from "@mui/system";
 import { useCallback, useEffect, useState } from "react";
 import ReactMarkdown from "react-markdown";
-import { useParams } from "react-router-dom";
+import { NavLink, useParams } from "react-router-dom";
 import remarkGfm from "remark-gfm";
 
 function ReadmeEditor({
@@ -58,6 +61,134 @@ function ReadmeEditor({
   );
 }
 
+function RepositoryCard({
+  repository,
+  onDescriptionChange,
+}: {
+  repository: RepositoryWithDetails;
+  onDescriptionChange?: (description: string) => void;
+}): JSX.Element {
+  const [showDescriptionEditor, setShowDescriptionEditor] =
+    useState<boolean>(false);
+
+  const [description, setDescription] = useState<string>(
+    repository.description
+  );
+
+  return (
+    <Card>
+      <Box
+        sx={{
+          display: "grid",
+          gridTemplateColumns: "3fr 2fr",
+          gridGap: "14px",
+        }}
+      >
+        <Stack>
+          <Stack direction="row" alignItems="center" spacing="5px">
+            <SvgIcon sx={{ marginRight: "10px" }}>
+              {repository.is_private ? <Lock /> : <Public />}
+            </SvgIcon>
+            <Typography variant="h2">{repository.namespace}</Typography>
+            <Typography variant="h2">/</Typography>
+            <Typography variant="h2" fontWeight="bold">
+              {repository.name}
+            </Typography>
+          </Stack>
+          <Typography variant="h4" sx={{ marginTop: "15px" }}>
+            Description
+          </Typography>
+
+          {showDescriptionEditor ? (
+            <Stack sx={{ marginTop: "10px", maxWidth: "320px" }}>
+              <TextField
+                value={description}
+                onChange={(e) => {
+                  setDescription(e.target.value);
+                }}
+              />
+              <Stack
+                direction="row"
+                justifyContent="flex-end"
+                spacing="5px"
+                sx={{ marginTop: "15px" }}
+              >
+                <Button
+                  variant="outlined"
+                  color="error"
+                  onClick={() => {
+                    setShowDescriptionEditor(false);
+                    setDescription(repository.description);
+                  }}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  variant="contained"
+                  onClick={() => {
+                    onDescriptionChange && onDescriptionChange(description);
+                    setShowDescriptionEditor(false);
+                  }}
+                >
+                  Update
+                </Button>
+              </Stack>
+            </Stack>
+          ) : (
+            <Stack
+              direction="row"
+              alignItems="center"
+              spacing="8px"
+              sx={{ marginTop: "10px" }}
+            >
+              <Typography>{repository.description}</Typography>
+              <IconButton
+                size="small"
+                onClick={() => setShowDescriptionEditor(true)}
+              >
+                <Edit fontSize="inherit" />
+              </IconButton>
+            </Stack>
+          )}
+          <Stack
+            direction="row"
+            alignItems="center"
+            spacing="8px"
+            sx={{ marginTop: "15px" }}
+          >
+            <SvgIcon>
+              <Schedule />
+            </SvgIcon>
+            <Typography variant="body2">
+              Last pushed: {repository.last_updated}
+            </Typography>
+          </Stack>
+        </Stack>
+        <Stack>
+          <Stack direction="row" justifyContent="space-between">
+            <Typography variant="h4">Docker commands</Typography>
+            <NavLink to={`/r/${repository.namespace}/${repository.name}`}>
+              <Button variant="outlined">Public View</Button>
+            </NavLink>
+          </Stack>
+          <Typography variant="body1">
+            To push a new tag to this repository,
+          </Typography>
+          <TextField
+            sx={{ backgroundColor: "#445E6E", marginTop: "15px" }}
+            InputProps={{
+              sx: { color: "white", fontWeight: 500 },
+              readOnly: true,
+              disableUnderline: true,
+            }}
+            value={`docker push ${repository.namespace}/${repository.name}:tagname`}
+          />
+        </Stack>
+      </Box>
+    </Card>
+  );
+}
+
 export default function () {
   const [showReadmeEdit, setShowReadmeEdit] = useState<boolean>(false);
   const [readme, setReadme] = useState<string>("");
@@ -90,17 +221,28 @@ export default function () {
     setReadme(repository?.full_description || "");
   }, [repository]);
 
+  const submitDescriptionChange = useCallback((value: string) => {
+    client.repositories
+      .patchRepository(namespace!, repositoryName!, {
+        description: value,
+      })
+      .then((x) => {
+        setRepository(x);
+        setReadme(x.full_description);
+      });
+  }, []);
+
   return (
     <>
       <Stack>
-        <Card>
-          <h1>nginx/nginx</h1>
-          <h2>Description</h2>
-          <p>
-            <Schedule />
-            Last pushed: an hour ago
-          </p>
-        </Card>
+        {repository && (
+          <RepositoryCard
+            repository={repository}
+            onDescriptionChange={(value) => {
+              submitDescriptionChange(value);
+            }}
+          />
+        )}
       </Stack>
       <Card>
         <Stack direction="row" alignItems="center">
