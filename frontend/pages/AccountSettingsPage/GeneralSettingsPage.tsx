@@ -38,7 +38,7 @@ export default function (): JSX.Element {
   }
 
   return (
-    <Card className="flex flex-col p-6 w-full space-y-6">
+    <Card className="flex flex-col w-full space-y-6">
       <Typography variant="h3">Account Information</Typography>
       <Typography variant="body1">
         This information will be visible to all users of Beluga.

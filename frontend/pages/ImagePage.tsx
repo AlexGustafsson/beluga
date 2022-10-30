@@ -127,7 +127,7 @@ export default function (): JSX.Element {
             </ul>
             <div className="absolute top-0 h-full w-8 bg-slate-100"></div>
           </Card>
-          <Card sx={{ padding: "24px", height: "max-content" }}>
+          <Card sx={{ height: "max-content" }}>
             <Typography
               variant="body2"
               sx={{ marginBottom: "24px" }}

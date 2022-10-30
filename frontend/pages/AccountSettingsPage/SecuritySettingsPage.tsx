@@ -87,7 +87,7 @@ function AccessTokenPopup({ open, onClose }: ModalProps): JSX.Element {
   const createTokenCard = token ? (
     <></>
   ) : (
-    <Card className="p-6 flex flex-col" sx={{ maxWidth: "740px" }}>
+    <Card className="flex flex-col" sx={{ maxWidth: "740px" }}>
       <Typography variant="h2">New Access Token</Typography>
       <Typography variant="body1">
         A personal access token is similar to a password except you can have
@@ -142,7 +142,7 @@ function AccessTokenPopup({ open, onClose }: ModalProps): JSX.Element {
   );
 
   const tokenCreatedCard = token ? (
-    <Card className="p-6 flex flex-col" sx={{ maxWidth: "740px" }}>
+    <Card className="flex flex-col" sx={{ maxWidth: "740px" }}>
       <Typography variant="h2">Copy Access Token</Typography>
       <Typography variant="body1">
         When logging in from your Docker CLI client, use this token as a
@@ -239,7 +239,7 @@ function AccessTokenInfoModal({ open, onClose }: ModalProps): JSX.Element {
     >
       <Fade in={open}>
         <Box className="flex items-center justify-center absolute w-full h-full">
-          <Card className="p-6 flex flex-col" sx={{ maxWidth: "740px" }}>
+          <Card className="flex flex-col" sx={{ maxWidth: "740px" }}>
             <Typography variant="h2">Edit Access Token</Typography>
             <Typography variant="body1">
               Personal access tokens are linked to your Beluga account and can
@@ -364,7 +364,7 @@ export default function (): JSX.Element {
   // TODO: On edit, show edit modal
   // TODO: On "more" button, show edit modal
   return (
-    <Card className="flex flex-col p-6 w-full space-y-6">
+    <Card className="flex flex-col w-full space-y-6">
       <Stack direction="row" className="justify-between items-center">
         <Typography variant="h3">Access Tokens</Typography>
         {tokens.length > 0 && (

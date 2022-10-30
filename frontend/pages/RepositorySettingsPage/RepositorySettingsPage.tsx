@@ -114,7 +114,7 @@ export default function () {
 
   return (
     <Stack>
-      <Card className="p-5">
+      <Card>
         <CardHeader
           title={<Typography variant="h4">Delete Repository</Typography>}
         />

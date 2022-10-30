@@ -30,7 +30,7 @@ export default function ({
   const navigate = useNavigate();
 
   return (
-    <Card sx={{ padding: "24px", ...sx }}>
+    <Card sx={{ ...sx }}>
       <Stack>
         <p className="text-xs text-gray-500">TAG</p>
         <Stack

@@ -93,7 +93,7 @@ export default function () {
   return (
     <>
       <Stack>
-        <Card className="p-5">
+        <Card>
           <h1>nginx/nginx</h1>
           <h2>Description</h2>
           <p>
@@ -102,7 +102,7 @@ export default function () {
           </p>
         </Card>
       </Stack>
-      <Card className="p-5">
+      <Card>
         <Stack direction="row" alignItems="center">
           <Typography variant="h4">README</Typography>
           {!showReadmeEdit && (

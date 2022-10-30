@@ -103,7 +103,7 @@ export default function (): JSX.Element {
           key={`${repository.namespace}/${repository.name}`}
         >
           <Card
-            className="p-5 mt-5 flex flex-row items-center"
+            className="mt-5 flex flex-row items-center"
             sx={{ color: "#445E6E" }}
           >
             <Stack className="grow">
@@ -134,7 +134,7 @@ export default function (): JSX.Element {
           </Card>
         </NavLink>
       ))}
-      <Card className="p-5 mt-5 text-sm">
+      <Card className="mt-5 text-sm">
         {repositories.length === 0 && (
           <p>There are no repositories in this namespace.</p>
         )}
