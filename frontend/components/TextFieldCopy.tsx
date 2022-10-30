@@ -59,7 +59,6 @@ export default function ({
           InputProps={{
             ...InputProps,
             readOnly: true,
-            disableUnderline: true,
             endAdornment: (
               <InputAdornment position="end">
                 <IconButton onClick={copy}>

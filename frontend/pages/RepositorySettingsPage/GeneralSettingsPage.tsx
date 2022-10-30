@@ -179,7 +179,6 @@ function RepositoryCard({
             InputProps={{
               sx: { color: "white", fontWeight: 500 },
               readOnly: true,
-              disableUnderline: true,
             }}
             value={`docker push ${repository.namespace}/${repository.name}:tagname`}
           />
