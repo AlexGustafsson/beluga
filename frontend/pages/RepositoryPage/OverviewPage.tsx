@@ -22,7 +22,7 @@ export default function (): JSX.Element {
       sx={{ display: "grid", gridTemplateColumns: "1fr auto", gridGap: "14px" }}
     >
       {repository ? (
-        <Card sx={{ padding: "24px" }}>
+        <Card>
           <ReactMarkdown
             className="markdown"
             remarkPlugins={[remarkGfm]}
@@ -34,7 +34,6 @@ export default function (): JSX.Element {
       ) : (
         <Card
           sx={{
-            padding: "24px",
             display: "flex",
             flexDirection: "column",
             alignItems: "center",
@@ -46,7 +45,7 @@ export default function (): JSX.Element {
         </Card>
       )}
 
-      <Card sx={{ padding: "24px", height: "max-content" }}>
+      <Card sx={{ height: "max-content" }}>
         <Typography
           variant="subtitle1"
           sx={{ marginBottom: "24px", fontWeight: 600 }}
